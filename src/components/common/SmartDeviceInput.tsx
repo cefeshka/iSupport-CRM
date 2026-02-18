@@ -35,6 +35,8 @@ export function SmartDeviceInput({
   useEffect(() => {
     if (type === 'imei' && value.length >= 8) {
       handleIMEILookup(value);
+    } else if (type === 'serial' && value.length >= 6) {
+      handleSerialLookup(value);
     }
 
     if (type === 'imei' && value.length === 15) {
@@ -108,6 +110,44 @@ export function SmartDeviceInput({
       }
     } catch (error) {
       console.error('Device lookup error:', error);
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleSerialLookup = async (serial: string) => {
+    if (serial.length < 6) return;
+
+    setIsValidating(true);
+
+    try {
+      const { data: historyData, error: historyError } = await supabase
+        .from('orders')
+        .select('device_brand, device_model, device_color')
+        .eq('serial_number', serial.toUpperCase())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!historyError && historyData) {
+        const deviceInfo: DeviceInfo = {
+          brand: historyData.device_brand || '',
+          model: historyData.device_model || '',
+          color: historyData.device_color || '',
+          source: 'history'
+        };
+        setDetectedDevice(deviceInfo);
+        if (onDeviceDetected) {
+          onDeviceDetected(deviceInfo);
+        }
+      } else {
+        setDetectedDevice(null);
+        if (onDeviceDetected) {
+          onDeviceDetected(null);
+        }
+      }
+    } catch (error) {
+      console.error('Serial lookup error:', error);
     } finally {
       setIsValidating(false);
     }
