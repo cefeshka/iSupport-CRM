@@ -6,6 +6,7 @@ import { useLocation } from '../../contexts/LocationContext';
 import { toast, handleSupabaseError } from '../../lib/toast';
 import { SmartDeviceInput } from '../common/SmartDeviceInput';
 import { ColorPicker } from '../common/ColorPicker';
+import { CustomerRecognition } from '../common/CustomerRecognition';
 import ServiceSearch from '../common/ServiceSearch';
 import InventorySearch from '../common/InventorySearch';
 import InputNumber from '../common/InputNumber';
@@ -65,7 +66,9 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
 
   const [newClientName, setNewClientName] = useState('');
   const [newClientPhone, setNewClientPhone] = useState('');
+  const [newClientEmail, setNewClientEmail] = useState('');
   const [newClientSource, setNewClientSource] = useState('direct');
+  const [recognizedClient, setRecognizedClient] = useState<Client | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -102,6 +105,22 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
       if (info.model) setDeviceModel(info.model);
       if (info.color) setDeviceColor(info.color);
     }
+  }
+
+  function handleClientSelect(client: Client) {
+    setRecognizedClient(client);
+    setSelectedClient(client.id);
+    setNewClientName(client.full_name);
+    setNewClientEmail(client.email || '');
+    setNewClientPhone(client.phone);
+    setNewClientSource(client.traffic_source || 'direct');
+    setShowNewClientForm(false);
+  }
+
+  function handleNewClient() {
+    setRecognizedClient(null);
+    setShowNewClientForm(true);
+    setSelectedClient('');
   }
 
   function handleServiceSelect(service: Service) {
@@ -226,20 +245,18 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
     setError('');
 
     // Validation
-    if (showNewClientForm) {
+    if (showNewClientForm && !recognizedClient) {
       if (!newClientName.trim()) {
-        toast.error('Client name is required');
+        toast.error('Klienta vārds ir obligāts');
         return;
       }
       if (!newClientPhone.trim() || newClientPhone.length < 5) {
-        toast.error('Valid phone number is required');
+        toast.error('Derīgs tālruņa numurs ir obligāts');
         return;
       }
-    } else {
-      if (!selectedClient) {
-        toast.error('Please select a client');
-        return;
-      }
+    } else if (!showNewClientForm && !selectedClient) {
+      toast.error('Lūdzu izvēlieties klientu');
+      return;
     }
 
     if (!deviceBrand || !deviceModel) {
@@ -282,12 +299,13 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
     try {
       let clientId = selectedClient;
 
-      if (showNewClientForm) {
+      if (showNewClientForm && !recognizedClient) {
         const { data: newClient, error: clientError } = await supabase
           .from('clients')
           .insert({
             full_name: newClientName.trim(),
             phone: newClientPhone.trim(),
+            email: newClientEmail.trim() || null,
             traffic_source: newClientSource,
             location_id: currentLocation?.id
           })
@@ -412,73 +430,107 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              Клиент
+              Klients / Tālrunis
             </label>
             {!showNewClientForm ? (
-              <div className="flex gap-2">
-                <select
-                  ref={firstInputRef as React.RefObject<HTMLSelectElement>}
-                  value={selectedClient}
-                  onChange={(e) => setSelectedClient(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required={!showNewClientForm}
-                >
-                  <option value="">Выберите клиента</option>
-                  {clients.map((client) => (
-                    <option key={client.id} value={client.id}>
-                      {client.full_name} ({client.phone})
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={() => setShowNewClientForm(true)}
-                  className="px-4 py-2 border border-neutral-200 rounded-lg hover:bg-neutral-50 flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Новый
-                </button>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <select
+                    ref={firstInputRef as React.RefObject<HTMLSelectElement>}
+                    value={selectedClient}
+                    onChange={(e) => setSelectedClient(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required={!showNewClientForm && !recognizedClient}
+                  >
+                    <option value="">Izvēlēties klientu</option>
+                    {clients.map((client) => (
+                      <option key={client.id} value={client.id}>
+                        {client.full_name} ({client.phone})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewClientForm(true);
+                      setRecognizedClient(null);
+                    }}
+                    className="px-4 py-2 border border-neutral-200 rounded-lg hover:bg-neutral-50 flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Jauns
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-3 p-4 bg-neutral-50 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-neutral-700">Новый клиент</span>
+                  <span className="text-sm font-medium text-neutral-700">Jauns klients</span>
                   <button
                     type="button"
-                    onClick={() => setShowNewClientForm(false)}
+                    onClick={() => {
+                      setShowNewClientForm(false);
+                      setNewClientPhone('');
+                      setNewClientName('');
+                      setNewClientEmail('');
+                      setRecognizedClient(null);
+                    }}
                     className="text-sm text-neutral-500 hover:text-neutral-700"
                   >
-                    Отмена
+                    Atcelt
                   </button>
                 </div>
-                <input
-                  type="text"
-                  value={newClientName}
-                  onChange={(e) => setNewClientName(e.target.value)}
-                  placeholder="Имя клиента"
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required={showNewClientForm}
+
+                <div>
+                  <input
+                    ref={firstInputRef as React.RefObject<HTMLInputElement>}
+                    type="tel"
+                    value={newClientPhone}
+                    onChange={(e) => setNewClientPhone(e.target.value)}
+                    placeholder="Tālrunis *"
+                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required={showNewClientForm}
+                  />
+                </div>
+
+                <CustomerRecognition
+                  phoneNumber={newClientPhone}
+                  onClientSelect={handleClientSelect}
+                  onNewClient={handleNewClient}
+                  disabled={loading}
                 />
-                <input
-                  ref={firstInputRef as React.RefObject<HTMLInputElement>}
-                  type="tel"
-                  value={newClientPhone}
-                  onChange={(e) => setNewClientPhone(e.target.value)}
-                  placeholder="Телефон"
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required={showNewClientForm}
-                />
-                <select
-                  value={newClientSource}
-                  onChange={(e) => setNewClientSource(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="direct">Прямое обращение</option>
-                  <option value="Instagram">Instagram</option>
-                  <option value="Google">Google</option>
-                  <option value="Yandex">Yandex</option>
-                  <option value="referral">Сарафанное радио</option>
-                </select>
+
+                {!recognizedClient && (
+                  <>
+                    <input
+                      type="text"
+                      value={newClientName}
+                      onChange={(e) => setNewClientName(e.target.value)}
+                      placeholder="Vārds, Uzvārds *"
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required={showNewClientForm && !recognizedClient}
+                    />
+                    <input
+                      type="email"
+                      value={newClientEmail}
+                      onChange={(e) => setNewClientEmail(e.target.value)}
+                      placeholder="E-pasts (neobligāts)"
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <select
+                      value={newClientSource}
+                      onChange={(e) => setNewClientSource(e.target.value)}
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="direct">Tieša vēršanās</option>
+                      <option value="Instagram">Instagram</option>
+                      <option value="Google">Google</option>
+                      <option value="Yandex">Yandex</option>
+                      <option value="Facebook">Facebook</option>
+                      <option value="referral">Ieteikums</option>
+                    </select>
+                  </>
+                )}
               </div>
             )}
           </div>
