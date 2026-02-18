@@ -4,7 +4,8 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLocation } from '../../contexts/LocationContext';
 import { toast, handleSupabaseError } from '../../lib/toast';
-import SmartDeviceRecognition from '../common/SmartDeviceRecognition';
+import { SmartDeviceInput } from '../common/SmartDeviceInput';
+import { ColorPicker } from '../common/ColorPicker';
 import ServiceSearch from '../common/ServiceSearch';
 import InventorySearch from '../common/InventorySearch';
 import InputNumber from '../common/InputNumber';
@@ -95,18 +96,12 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
     if (stagesRes.data) setStages(stagesRes.data);
   }
 
-  function handleDeviceRecognized(device: {
-    brand: string;
-    model: string;
-    color: string;
-    imei?: string;
-    serialNumber?: string;
-  }) {
-    setDeviceBrand(device.brand);
-    setDeviceModel(device.model);
-    setDeviceColor(device.color);
-    if (device.imei) setDeviceIMEI(device.imei);
-    if (device.serialNumber) setDeviceSerialNumber(device.serialNumber);
+  function handleDeviceDetected(info: { brand: string; model: string; color: string } | null) {
+    if (info) {
+      if (info.brand) setDeviceBrand(info.brand);
+      if (info.model) setDeviceModel(info.model);
+      if (info.color) setDeviceColor(info.color);
+    }
   }
 
   function handleServiceSelect(service: Service) {
@@ -489,12 +484,87 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
           </div>
 
           <div className="border-t border-neutral-200 -mx-6 px-6 py-5 bg-neutral-50">
-            <h3 className="text-sm font-semibold text-neutral-900 mb-4">Device Information</h3>
-            <SmartDeviceRecognition
-              onDeviceRecognized={handleDeviceRecognized}
-              initialIMEI={deviceIMEI}
-              initialSerialNumber={deviceSerialNumber}
-            />
+            <h3 className="text-sm font-semibold text-neutral-900 mb-4">Ierīces informācija</h3>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                  IMEI
+                </label>
+                <SmartDeviceInput
+                  type="imei"
+                  value={deviceIMEI}
+                  onChange={setDeviceIMEI}
+                  onDeviceDetected={handleDeviceDetected}
+                  placeholder="Ievadiet IMEI (15 cipari)"
+                  locationId={currentLocation?.id}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                  Sērijas numurs
+                </label>
+                <SmartDeviceInput
+                  type="serial"
+                  value={deviceSerialNumber}
+                  onChange={setDeviceSerialNumber}
+                  placeholder="Ievadiet sērijas numuru"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                  Ražotājs (Brand) *
+                </label>
+                <input
+                  type="text"
+                  value={deviceBrand}
+                  onChange={(e) => setDeviceBrand(e.target.value)}
+                  placeholder="Apple, Samsung, Xiaomi..."
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                  Modelis (Model) *
+                </label>
+                <input
+                  type="text"
+                  value={deviceModel}
+                  onChange={(e) => setDeviceModel(e.target.value)}
+                  placeholder="iPhone 15 Pro, Galaxy S24..."
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <ColorPicker
+                label="Krāsa (Color) *"
+                value={deviceColor}
+                onChange={setDeviceColor}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                Problēmas apraksts *
+              </label>
+              <textarea
+                value={issueDescription}
+                onChange={(e) => setIssueDescription(e.target.value)}
+                placeholder="Detalizēti aprakstiet problēmu..."
+                rows={3}
+                className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                required
+              />
+            </div>
           </div>
 
           <div>
