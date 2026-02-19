@@ -25,25 +25,35 @@ export default function InventoryList() {
   const [editingItem, setEditingItem] = useState<Inventory | null>(null);
 
   useEffect(() => {
-    if (currentLocation) {
-      loadInventory();
-    }
+    loadInventory();
   }, [currentLocation]);
 
   async function loadInventory() {
-    if (!currentLocation) return;
+    try {
+      let query = supabase
+        .from('inventory')
+        .select(`
+          *,
+          supplier:suppliers(name)
+        `)
+        .order('part_name');
 
-    const { data } = await supabase
-      .from('inventory')
-      .select(`
-        *,
-        supplier:suppliers(name)
-      `)
-      .eq('location_id', currentLocation.id)
-      .order('part_name');
+      if (currentLocation?.id) {
+        query = query.or(`location_id.eq.${currentLocation.id},location_id.is.null`);
+      }
 
-    if (data) setInventory(data);
-    setLoading(false);
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error loading inventory:', error);
+      } else if (data) {
+        setInventory(data);
+      }
+    } catch (error) {
+      console.error('Error loading inventory:', error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleEdit(item: Inventory) {

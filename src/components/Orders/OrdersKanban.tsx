@@ -34,9 +34,7 @@ export default function OrdersKanban({ onOrderClick }: OrdersKanbanProps) {
   const [stages, setStages] = useState<OrderStage[]>([]);
 
   useEffect(() => {
-    if (currentLocation) {
-      loadData();
-    }
+    loadData();
   }, [currentLocation]);
 
   useEffect(() => {
@@ -44,24 +42,37 @@ export default function OrdersKanban({ onOrderClick }: OrdersKanbanProps) {
   }, [orders, searchQuery, dateFrom, dateTo, selectedStage, minAmount, maxAmount]);
 
   async function loadData() {
-    if (!currentLocation) return;
-
-    const [ordersRes, stagesRes] = await Promise.all([
-      supabase
+    try {
+      let ordersQuery = supabase
         .from('orders')
         .select(`
           *,
           client:clients(*),
           stage:order_stages(*)
         `)
-        .eq('location_id', currentLocation.id)
-        .order('created_at', { ascending: false }),
-      supabase.from('order_stages').select('*').order('position')
-    ]);
+        .order('created_at', { ascending: false });
 
-    if (ordersRes.data) setOrders(ordersRes.data as OrderWithDetails[]);
-    if (stagesRes.data) setStages(stagesRes.data);
-    setLoading(false);
+      if (currentLocation?.id) {
+        ordersQuery = ordersQuery.or(`location_id.eq.${currentLocation.id},location_id.is.null`);
+      }
+
+      const [ordersRes, stagesRes] = await Promise.all([
+        ordersQuery,
+        supabase.from('order_stages').select('*').order('position')
+      ]);
+
+      if (ordersRes.error) {
+        console.error('Error loading orders:', ordersRes.error);
+      } else if (ordersRes.data) {
+        setOrders(ordersRes.data as OrderWithDetails[]);
+      }
+
+      if (stagesRes.data) setStages(stagesRes.data);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function applyFilters() {

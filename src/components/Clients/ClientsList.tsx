@@ -17,22 +17,32 @@ export default function ClientsList({ onClientClick }: ClientsListProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (currentLocation) {
-      loadClients();
-    }
+    loadClients();
   }, [currentLocation]);
 
   async function loadClients() {
-    if (!currentLocation) return;
+    try {
+      let query = supabase
+        .from('clients')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    const { data } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('location_id', currentLocation.id)
-      .order('created_at', { ascending: false });
+      if (currentLocation?.id) {
+        query = query.or(`location_id.eq.${currentLocation.id},location_id.is.null`);
+      }
 
-    if (data) setClients(data);
-    setLoading(false);
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error loading clients:', error);
+      } else if (data) {
+        setClients(data);
+      }
+    } catch (error) {
+      console.error('Error loading clients:', error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const filteredClients = clients.filter((client) =>

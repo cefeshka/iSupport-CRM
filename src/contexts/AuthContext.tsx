@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function isAdmin(): boolean {
     if (!profile) return false;
-    return profile.role === 'admin';
+    return profile.role === 'admin' || profile.role === 'owner';
   }
 
   async function hasPermission(module: string, action: string): Promise<boolean> {
