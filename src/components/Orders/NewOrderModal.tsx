@@ -99,7 +99,7 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
     if (stagesRes.data) setStages(stagesRes.data);
   }
 
-  function handleDeviceDetected(info: { brand: string; model: string; color?: string } | null) {
+  function handleDeviceDetected(info: { brand: string; model: string; color?: string; source?: string } | null) {
     if (info) {
       if (info.brand) setDeviceBrand(info.brand);
       if (info.model) setDeviceModel(info.model);
@@ -275,17 +275,21 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
     }
 
     // Validate service prices if services are selected
-    const invalidService = selectedServices.find(s => s.price <= 0);
-    if (invalidService) {
-      toast.error(`Price for "${invalidService.name}" must be greater than 0`);
-      return;
+    if (selectedServices.length > 0) {
+      const invalidService = selectedServices.find(s => s.price <= 0);
+      if (invalidService) {
+        toast.error(`Price for "${invalidService.name}" must be greater than 0`);
+        return;
+      }
     }
 
     // Validate part prices if parts are selected
-    const invalidPart = selectedParts.find(p => p.selling_price <= 0);
-    if (invalidPart) {
-      toast.error(`Price for "${invalidPart.part_name}" must be greater than 0`);
-      return;
+    if (selectedParts.length > 0) {
+      const invalidPart = selectedParts.find(p => p.selling_price <= 0);
+      if (invalidPart) {
+        toast.error(`Price for "${invalidPart.part_name}" must be greater than 0`);
+        return;
+      }
     }
 
     setLoading(true);
@@ -601,12 +605,12 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                Problēmas apraksts *
+                Problem Description *
               </label>
               <textarea
                 value={issueDescription}
                 onChange={(e) => setIssueDescription(e.target.value)}
-                placeholder="Detalizēti aprakstiet problēmu..."
+                placeholder="Describe the problem in detail..."
                 rows={3}
                 className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 required
