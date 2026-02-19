@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Plus, Pencil, Trash2, Phone, Mail, Building2 } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { toast, handleSupabaseError } from '../../lib/toast';
 
 interface Supplier {

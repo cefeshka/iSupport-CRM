@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { X } from 'lucide-react';
 import { useLocation } from '../../contexts/LocationContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { toast, handleSupabaseError } from '../../lib/toast';
 
 interface NewClientModalProps {
@@ -11,6 +12,7 @@ interface NewClientModalProps {
 
 export default function NewClientModal({ onClose, onSuccess }: NewClientModalProps) {
   const { currentLocation } = useLocation();
+  const { t } = useLanguage();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -70,7 +72,7 @@ export default function NewClientModal({ onClose, onSuccess }: NewClientModalPro
     >
       <div className="bg-white rounded-2xl max-w-md w-full">
         <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-neutral-900">New Customer</h2>
+          <h2 className="text-xl font-semibold text-neutral-900">{t('clients.new')}</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-lg hover:bg-neutral-100 flex items-center justify-center transition-colors"
@@ -82,7 +84,7 @@ export default function NewClientModal({ onClose, onSuccess }: NewClientModalPro
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              Full Name *
+              {t('clients.fullName')} *
             </label>
             <input
               type="text"
@@ -97,7 +99,7 @@ export default function NewClientModal({ onClose, onSuccess }: NewClientModalPro
 
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              Phone Number *
+              {t('clients.phone')} *
             </label>
             <input
               type="tel"
@@ -111,7 +113,7 @@ export default function NewClientModal({ onClose, onSuccess }: NewClientModalPro
 
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              Email
+              {t('clients.email')}
             </label>
             <input
               type="email"
@@ -124,31 +126,31 @@ export default function NewClientModal({ onClose, onSuccess }: NewClientModalPro
 
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              Traffic Source
+              {t('clients.trafficSource')}
             </label>
             <select
               value={trafficSource}
               onChange={(e) => setTrafficSource(e.target.value)}
               className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="direct">Direct</option>
-              <option value="Instagram">Instagram</option>
-              <option value="Google">Google</option>
-              <option value="Yandex">Yandex</option>
-              <option value="Facebook">Facebook</option>
-              <option value="referral">Referral</option>
-              <option value="other">Other</option>
+              <option value="direct">{t('source.direct')}</option>
+              <option value="Instagram">{t('source.Instagram')}</option>
+              <option value="Google">{t('source.Google')}</option>
+              <option value="Yandex">{t('source.Yandex')}</option>
+              <option value="Facebook">{t('source.Facebook')}</option>
+              <option value="referral">{t('source.referral')}</option>
+              <option value="other">{t('source.other')}</option>
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              Notes
+              {t('common.notes')}
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Additional notes about the customer..."
+              placeholder={t('common.notes')}
               rows={3}
               className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
@@ -160,14 +162,14 @@ export default function NewClientModal({ onClose, onSuccess }: NewClientModalPro
               onClick={onClose}
               className="flex-1 px-4 py-2.5 border border-neutral-200 rounded-lg font-medium hover:bg-neutral-50 transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-md disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Customer'}
+              {loading ? t('clients.creating') : t('clients.createCustomer')}
             </button>
           </div>
         </form>

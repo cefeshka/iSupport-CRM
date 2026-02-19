@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Search, Phone, Mail, TrendingUp, MessageSquare, Plus } from 'lucide-react';
 import { useLocation } from '../../contexts/LocationContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import NewClientModal from './NewClientModal';
 import type { Database } from '../../lib/database.types';
 
@@ -13,6 +14,7 @@ interface ClientsListProps {
 
 export default function ClientsList({ onClientClick }: ClientsListProps) {
   const { currentLocation } = useLocation();
+  const { t } = useLanguage();
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -71,7 +73,7 @@ export default function ClientsList({ onClientClick }: ClientsListProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-neutral-500">Загрузка...</div>
+        <div className="text-neutral-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -80,15 +82,15 @@ export default function ClientsList({ onClientClick }: ClientsListProps) {
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-900">Клиенты</h1>
-          <p className="text-neutral-500 mt-1">База клиентов и история взаимодействий</p>
+          <h1 className="text-2xl font-semibold text-neutral-900">{t('clients.title')}</h1>
+          <p className="text-neutral-500 mt-1">{t('clients.list')}</p>
         </div>
         <button
           onClick={() => setShowNewClientModal(true)}
           className="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-md flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
-          New Customer
+          {t('clients.new')}
         </button>
       </div>
 
@@ -99,7 +101,7 @@ export default function ClientsList({ onClientClick }: ClientsListProps) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Поиск по имени или телефону..."
+            placeholder={t('clients.searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
@@ -111,22 +113,22 @@ export default function ClientsList({ onClientClick }: ClientsListProps) {
             <thead className="bg-neutral-50 border-b border-neutral-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Клиент
+                  {t('orders.client')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Контакты
+                  {t('clients.contacts')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Статус
+                  {t('common.status')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Заказы
+                  {t('clients.orders')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  LTV
+                  {t('clients.ltv')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Источник
+                  {t('clients.trafficSource')}
                 </th>
               </tr>
             </thead>
@@ -187,7 +189,7 @@ export default function ClientsList({ onClientClick }: ClientsListProps) {
 
         {filteredClients.length === 0 && (
           <div className="py-12 text-center text-neutral-500">
-            Клиенты не найдены
+            {t('clients.noClientsFound')}
           </div>
         )}
       </div>

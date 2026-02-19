@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { LanguageProvider } from './contexts/LanguageContext';
 import './index.css';
 
 console.log('Main.tsx: Starting application...');
@@ -17,7 +18,9 @@ if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
       <ErrorBoundary>
-        <App />
+        <LanguageProvider>
+          <App />
+        </LanguageProvider>
       </ErrorBoundary>
     </StrictMode>
   );
