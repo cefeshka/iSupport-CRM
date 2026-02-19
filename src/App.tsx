@@ -32,10 +32,10 @@ interface OrderWithDetails extends Order {
 
 function AppContent() {
   console.log('AppContent rendering');
-  const { user, loading } = useAuth();
-  console.log('Auth state:', { user: !!user, loading });
-  const { currentLocation, loading: locationLoading } = useLocation();
-  console.log('Location state:', { currentLocation: !!currentLocation, locationLoading });
+  const { user, loading, profile, isAdmin } = useAuth();
+  console.log('Auth state:', { user: !!user, loading, profile });
+  const { currentLocation, locations, loading: locationLoading } = useLocation();
+  console.log('Location state:', { currentLocation: !!currentLocation, locations: locations.length, locationLoading });
   const [activeView, setActiveView] = useState('dashboard');
   const [selectedOrder, setSelectedOrder] = useState<OrderWithDetails | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -54,7 +54,7 @@ function AppContent() {
     return <AuthPage />;
   }
 
-  if (!currentLocation) {
+  if (!currentLocation && locations.length === 0) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white rounded-xl border-2 border-amber-200 p-6">
@@ -63,12 +63,12 @@ function AppContent() {
               <AlertCircle className="w-6 h-6 text-amber-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-neutral-900">No Location Available</h2>
-              <p className="text-sm text-neutral-500">Contact your administrator</p>
+              <h2 className="text-lg font-semibold text-neutral-900">No Location Found</h2>
+              <p className="text-sm text-neutral-500">Setup required</p>
             </div>
           </div>
           <p className="text-sm text-neutral-600 mb-4">
-            Your account is not assigned to any location. Please contact your system administrator to assign you to a branch location before you can access the system.
+            No locations have been created in the system yet. {isAdmin() ? 'Please create a location in Settings to continue.' : 'Please contact your administrator to set up locations.'}
           </p>
           <button
             onClick={() => window.location.reload()}

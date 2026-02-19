@@ -59,16 +59,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function loadProfile(userId: string) {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+    console.log('Loading profile for user ID:', userId);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
 
-    if (data) {
-      setProfile(data);
+      if (error) {
+        console.error('Error loading profile:', error);
+      }
+
+      if (data) {
+        console.log('Profile loaded:', data);
+        setProfile(data);
+      } else {
+        console.warn('No profile found for user ID:', userId);
+      }
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function signIn(email: string, password: string) {

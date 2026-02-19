@@ -38,9 +38,12 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
   async function loadLocations() {
     if (!profile) {
+      console.log('No profile available, skipping location load');
       setLoading(false);
       return;
     }
+
+    console.log('Loading locations for profile:', { role: profile.role, location_id: profile.location_id });
 
     try {
       const { data, error } = await supabase
@@ -48,36 +51,57 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         .select('*')
         .order('id', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading locations:', error);
+      }
+
+      console.log('Locations loaded:', data?.length || 0, 'locations');
 
       if (data && data.length > 0) {
         setLocations(data);
 
-        if (profile?.location_id) {
+        const userCanSwitch = profile.role === 'admin' || profile.role === 'owner' || profile.role === 'manager';
+        console.log('User can switch locations:', userCanSwitch);
+
+        if (profile.location_id) {
           const userLocation = data.find(loc => loc.id === profile.location_id);
           if (userLocation) {
+            console.log('Setting user location from profile:', userLocation.name);
             setCurrentLocationState(userLocation);
             localStorage.setItem('selectedLocationId', userLocation.id.toString());
             setLoading(false);
             return;
+          } else {
+            console.warn('Profile location_id not found in locations:', profile.location_id);
           }
         }
 
-        if (canSwitchLocation) {
+        if (userCanSwitch) {
           const savedLocationId = localStorage.getItem('selectedLocationId');
           const savedLocation = savedLocationId
             ? data.find(loc => loc.id === parseInt(savedLocationId))
             : null;
 
-          setCurrentLocationState(savedLocation || data[0]);
+          const selectedLocation = savedLocation || data[0];
+          console.log('Setting location for admin/manager:', selectedLocation.name);
+          setCurrentLocationState(selectedLocation);
+          if (!savedLocationId && data[0]) {
+            localStorage.setItem('selectedLocationId', data[0].id.toString());
+          }
         } else {
+          console.log('Setting default location for non-admin:', data[0].name);
           setCurrentLocationState(data[0]);
+          localStorage.setItem('selectedLocationId', data[0].id.toString());
         }
       } else {
-        console.warn('No locations found in database');
+        console.warn('No locations found in database. Please create at least one location.');
+        setLocations([]);
+        setCurrentLocationState(null);
       }
     } catch (error) {
       console.error('Error loading locations:', error);
+      setLocations([]);
+      setCurrentLocationState(null);
     } finally {
       setLoading(false);
     }
