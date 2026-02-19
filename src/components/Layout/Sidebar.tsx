@@ -2,6 +2,7 @@ import { LayoutDashboard, FolderKanban, Users, Package, BarChart3, LogOut, Plus,
 import { useAuth } from '../../contexts/AuthContext';
 import { useLocation } from '../../contexts/LocationContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import { useState } from 'react';
 
 interface SidebarProps {
@@ -14,11 +15,12 @@ export default function Sidebar({ activeView, onViewChange, onQuickAction }: Sid
   const { profile, signOut, isAdmin } = useAuth();
   const { locations, currentLocation, setCurrentLocation, canSwitchLocation } = useLocation();
   const { language, setLanguage, t } = useLanguage();
+  const { canCreateOrder, canManageUsers } = usePermissions();
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   const isTechnician = profile?.role === 'technician';
-  const canViewSettings = isAdmin() || profile?.role === 'owner' || profile?.role === 'manager';
+  const canViewSettings = canManageUsers();
 
   const allMenuItems = [
     { id: 'dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
@@ -51,13 +53,15 @@ export default function Sidebar({ activeView, onViewChange, onQuickAction }: Sid
         </div>
       </div>
 
-      <button
-        onClick={onQuickAction}
-        className="m-4 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white px-4 py-2.5 rounded-lg font-medium hover:from-fuchsia-600 hover:to-pink-600 transition-all shadow-md shadow-fuchsia-500/20 flex items-center justify-center gap-2"
-      >
-        <Plus className="w-4 h-4" />
-        {t('orders.new')}
-      </button>
+      {canCreateOrder() && (
+        <button
+          onClick={onQuickAction}
+          className="m-4 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white px-4 py-2.5 rounded-lg font-medium hover:from-fuchsia-600 hover:to-pink-600 transition-all shadow-md shadow-fuchsia-500/20 flex items-center justify-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          {t('orders.new')}
+        </button>
+      )}
 
       <div className="mx-4 mb-4">
         <div className="relative">

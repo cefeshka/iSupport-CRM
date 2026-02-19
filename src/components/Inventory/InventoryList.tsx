@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Package, AlertTriangle, Search, TrendingDown, Plus, Minus } from 'lucide-react';
 import { useLocation } from '../../contexts/LocationContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import type { Database } from '../../lib/database.types';
 import InventoryDetailModal from './InventoryDetailModal';
 import IncomeModal from './IncomeModal';
@@ -16,6 +17,7 @@ type Inventory = Database['public']['Tables']['inventory']['Row'] & {
 
 export default function InventoryList() {
   const { currentLocation } = useLocation();
+  const { canAddInventory, canEditInventory, canDeleteInventory } = usePermissions();
   const [inventory, setInventory] = useState<Inventory[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -84,20 +86,24 @@ export default function InventoryList() {
           <p className="text-neutral-500 mt-1">Inventory and parts management</p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowOutcomeModal(true)}
-            className="px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium flex items-center gap-2"
-          >
-            <Minus className="w-4 h-4" />
-            Manual Write-off
-          </button>
-          <button
-            onClick={() => setShowIncomeModal(true)}
-            className="px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            New Income
-          </button>
+          {canEditInventory() && (
+            <button
+              onClick={() => setShowOutcomeModal(true)}
+              className="px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium flex items-center gap-2"
+            >
+              <Minus className="w-4 h-4" />
+              Manual Write-off
+            </button>
+          )}
+          {canAddInventory() && (
+            <button
+              onClick={() => setShowIncomeModal(true)}
+              className="px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              New Income
+            </button>
+          )}
         </div>
       </div>
 

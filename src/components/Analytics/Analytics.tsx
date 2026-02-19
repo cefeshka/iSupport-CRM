@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLocation } from '../../contexts/LocationContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
   TrendingUp,
   TrendingDown,
@@ -84,6 +85,7 @@ const LEAD_SOURCE_COLORS = {
 
 export default function Analytics() {
   const { currentLocation } = useLocation();
+  const { canViewFinancialReports } = usePermissions();
   const [dateFilter, setDateFilter] = useState<DateFilter>('month');
   const [customDateFrom, setCustomDateFrom] = useState('');
   const [customDateTo, setCustomDateTo] = useState('');
@@ -353,6 +355,17 @@ export default function Analytics() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-neutral-500">Загрузка аналитики...</div>
+      </div>
+    );
+  }
+
+  if (!canViewFinancialReports()) {
+    return (
+      <div className="h-full flex items-center justify-center bg-neutral-50">
+        <div className="text-center">
+          <p className="text-lg text-neutral-600">Access Denied</p>
+          <p className="text-sm text-neutral-500 mt-2">You do not have permission to view financial reports</p>
+        </div>
       </div>
     );
   }

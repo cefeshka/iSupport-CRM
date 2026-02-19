@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { X, Clock, User, Phone, Mail, Plus, Search, FileText, TrendingUp, DollarSign, ChevronDown, Printer, Package, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import type { Database } from '../../lib/database.types';
 import OrderItemEditPanel from './OrderItemEditPanel';
 import OrderReceipt from './OrderReceipt';
@@ -30,8 +31,8 @@ interface OrderDetailProps {
 type TabType = 'general' | 'services' | 'invoices' | 'files';
 
 export default function OrderDetail({ order, onClose, onUpdate }: OrderDetailProps) {
-  const { profile, isAdmin } = useAuth();
-  const canDelete = isAdmin() || profile?.role === 'owner' || profile?.role === 'manager';
+  const { profile } = useAuth();
+  const { canEditOrder, canDeleteOrder, canChangeOrderStatus } = usePermissions();
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [history, setHistory] = useState<OrderHistory[]>([]);
   const [items, setItems] = useState<OrderItem[]>([]);
@@ -788,7 +789,7 @@ export default function OrderDetail({ order, onClose, onUpdate }: OrderDetailPro
                             </span>
                           </td>
                           <td className="px-4 py-3 text-center">
-                            {canDelete && (
+                            {canDeleteOrder() && (
                               <button
                                 onClick={(e) => handleDeleteItem(item.id, e)}
                                 className="p-1.5 hover:bg-red-50 rounded-lg transition-colors group"

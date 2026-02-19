@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Truck
 } from 'lucide-react';
+import { usePermissions } from '../../hooks/usePermissions';
 import CompanyProfile from './CompanyProfile';
 import ServiceCatalogManager from './ServiceCatalogManager';
 import UsersManagement from './UsersManagement';
@@ -26,19 +27,22 @@ import SuppliersManager from './SuppliersManager';
 type SettingsTab = 'company' | 'services' | 'suppliers' | 'team' | 'permissions' | 'sources' | 'templates' | 'logs' | 'export';
 
 export default function Settings() {
+  const { canManageUsers, canEditTemplates, canManageLocations } = usePermissions();
   const [activeTab, setActiveTab] = useState<SettingsTab>('company');
 
-  const tabs = [
-    { id: 'company' as SettingsTab, label: 'Профиль компании', icon: Building2, description: 'Реквизиты, брендинг, валюта' },
-    { id: 'services' as SettingsTab, label: 'Каталог услуг', icon: Wrench, description: 'Услуги и ремонты' },
-    { id: 'suppliers' as SettingsTab, label: 'Поставщики', icon: Truck, description: 'Управление поставщиками' },
-    { id: 'team' as SettingsTab, label: 'Команда', icon: Users, description: 'Сотрудники и роли' },
-    { id: 'permissions' as SettingsTab, label: 'Права доступа', icon: Shield, description: 'Управление правами (RBAC)' },
-    { id: 'sources' as SettingsTab, label: 'Источники лидов', icon: Target, description: 'Маркетинговые каналы' },
-    { id: 'templates' as SettingsTab, label: 'Шаблоны документов', icon: FileText, description: 'Квитанции и договоры' },
-    { id: 'logs' as SettingsTab, label: 'Журнал активности', icon: Activity, description: 'История действий персонала' },
-    { id: 'export' as SettingsTab, label: 'Экспорт данных', icon: Download, description: 'Резервное копирование' },
+  const allTabs = [
+    { id: 'company' as SettingsTab, label: 'Профиль компании', icon: Building2, description: 'Реквизиты, брендинг, валюта', requiresPermission: false },
+    { id: 'services' as SettingsTab, label: 'Каталог услуг', icon: Wrench, description: 'Услуги и ремонты', requiresPermission: false },
+    { id: 'suppliers' as SettingsTab, label: 'Поставщики', icon: Truck, description: 'Управление поставщиками', requiresPermission: false },
+    { id: 'team' as SettingsTab, label: 'Команда', icon: Users, description: 'Сотрудники и роли', requiresPermission: true, checkPermission: () => canManageUsers() },
+    { id: 'permissions' as SettingsTab, label: 'Права доступа', icon: Shield, description: 'Управление правами (RBAC)', requiresPermission: true, checkPermission: () => canManageUsers() },
+    { id: 'sources' as SettingsTab, label: 'Источники лидов', icon: Target, description: 'Маркетинговые каналы', requiresPermission: false },
+    { id: 'templates' as SettingsTab, label: 'Шаблоны документов', icon: FileText, description: 'Квитанции и договоры', requiresPermission: true, checkPermission: () => canEditTemplates() },
+    { id: 'logs' as SettingsTab, label: 'Журнал активности', icon: Activity, description: 'История действий персонала', requiresPermission: true, checkPermission: () => canManageUsers() },
+    { id: 'export' as SettingsTab, label: 'Экспорт данных', icon: Download, description: 'Резервное копирование', requiresPermission: false },
   ];
+
+  const tabs = allTabs.filter(tab => !tab.requiresPermission || (tab.checkPermission && tab.checkPermission()));
 
   return (
     <div className="h-full overflow-auto bg-neutral-50">

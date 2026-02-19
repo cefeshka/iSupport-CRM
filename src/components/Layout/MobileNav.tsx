@@ -1,5 +1,6 @@
 import { LayoutDashboard, FolderKanban, Users, Package, BarChart3, Plus, ShoppingCart, Settings, MapPin, X, Wallet } from 'lucide-react';
 import { useLocation } from '../../contexts/LocationContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import { useState } from 'react';
 
 interface MobileNavProps {
@@ -10,6 +11,7 @@ interface MobileNavProps {
 
 export default function MobileNav({ activeView, onViewChange, onQuickAction }: MobileNavProps) {
   const { locations, currentLocation, setCurrentLocation, canSwitchLocation } = useLocation();
+  const { canCreateOrder } = usePermissions();
   const [showLocationModal, setShowLocationModal] = useState(false);
 
   const menuItems = [
@@ -25,14 +27,16 @@ export default function MobileNav({ activeView, onViewChange, onQuickAction }: M
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50 lg:hidden">
-        <button
-          onClick={onQuickAction}
-          className="w-14 h-14 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white rounded-full shadow-lg shadow-fuchsia-500/30 flex items-center justify-center hover:from-fuchsia-600 hover:to-pink-600 transition-all"
-        >
-          <Plus className="w-6 h-6" />
-        </button>
-      </div>
+      {canCreateOrder() && (
+        <div className="fixed bottom-6 right-6 z-50 lg:hidden">
+          <button
+            onClick={onQuickAction}
+            className="w-14 h-14 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white rounded-full shadow-lg shadow-fuchsia-500/30 flex items-center justify-center hover:from-fuchsia-600 hover:to-pink-600 transition-all"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+        </div>
+      )}
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 lg:hidden z-40">
         <div className="flex items-center justify-around px-2 py-2">
