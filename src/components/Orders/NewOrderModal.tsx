@@ -99,7 +99,7 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
     if (stagesRes.data) setStages(stagesRes.data);
   }
 
-  function handleDeviceDetected(info: { brand: string; model: string; color: string } | null) {
+  function handleDeviceDetected(info: { brand: string; model: string; color?: string } | null) {
     if (info) {
       if (info.brand) setDeviceBrand(info.brand);
       if (info.model) setDeviceModel(info.model);
@@ -274,19 +274,14 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
       return;
     }
 
-    if (selectedServices.length === 0 && selectedParts.length === 0) {
-      toast.error('Add at least one service or part');
-      return;
-    }
-
-    // Validate service prices
+    // Validate service prices if services are selected
     const invalidService = selectedServices.find(s => s.price <= 0);
     if (invalidService) {
       toast.error(`Price for "${invalidService.name}" must be greater than 0`);
       return;
     }
 
-    // Validate part prices
+    // Validate part prices if parts are selected
     const invalidPart = selectedParts.find(p => p.selling_price <= 0);
     if (invalidPart) {
       toast.error(`Price for "${invalidPart.part_name}" must be greater than 0`);
@@ -773,18 +768,6 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              Описание проблемы
-            </label>
-            <textarea
-              value={issueDescription}
-              onChange={(e) => setIssueDescription(e.target.value)}
-              placeholder="Подробное описание поломки или требуемого ремонта..."
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
-              required
-            />
-          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>

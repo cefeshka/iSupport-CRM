@@ -39,6 +39,12 @@ export default function NewPurchaseOrderModal({ suppliers, onClose, onSuccess }:
   const [inventoryResults, setInventoryResults] = useState<InventoryItem[]>([]);
   const [showInventoryDropdown, setShowInventoryDropdown] = useState(false);
 
+  const [showNewSupplierModal, setShowNewSupplierModal] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState('');
+  const [newSupplierPhone, setNewSupplierPhone] = useState('');
+  const [newSupplierEmail, setNewSupplierEmail] = useState('');
+  const [localSuppliers, setLocalSuppliers] = useState<Supplier[]>(suppliers);
+
   useEffect(() => {
     if (inventorySearch.trim().length >= 2) {
       searchInventory(inventorySearch.trim());
@@ -95,6 +101,38 @@ export default function NewPurchaseOrderModal({ suppliers, onClose, onSuccess }:
   }
 
   const totalCost = items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0);
+
+  async function handleCreateSupplier() {
+    if (!newSupplierName.trim()) {
+      alert('Введите название поставщика');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('suppliers')
+        .insert({
+          name: newSupplierName.trim(),
+          phone: newSupplierPhone.trim() || null,
+          email: newSupplierEmail.trim() || null
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setLocalSuppliers([...localSuppliers, data]);
+      setSupplierId(data.id);
+      setShowNewSupplierModal(false);
+      setNewSupplierName('');
+      setNewSupplierPhone('');
+      setNewSupplierEmail('');
+      alert('Поставщик успешно создан');
+    } catch (error) {
+      console.error('Error creating supplier:', error);
+      alert('Ошибка при создании поставщика');
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -183,19 +221,29 @@ export default function NewPurchaseOrderModal({ suppliers, onClose, onSuccess }:
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Поставщик *
               </label>
-              <select
-                value={supplierId}
-                onChange={(e) => setSupplierId(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Выберите поставщика</option>
-                {suppliers.map((supplier) => (
-                  <option key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  value={supplierId}
+                  onChange={(e) => setSupplierId(e.target.value)}
+                  required
+                  className="flex-1 px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Выберите поставщика</option>
+                  {localSuppliers.map((supplier) => (
+                    <option key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowNewSupplierModal(true)}
+                  className="px-3 py-2 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+                  title="Создать нового поставщика"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             <div>
@@ -387,6 +435,83 @@ export default function NewPurchaseOrderModal({ suppliers, onClose, onSuccess }:
           </button>
         </div>
       </div>
+
+      {showNewSupplierModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]"
+          onClick={(e) => e.target === e.currentTarget && setShowNewSupplierModal(false)}
+        >
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
+              <h3 className="text-lg font-semibold text-neutral-900">Новый поставщик</h3>
+              <button
+                onClick={() => setShowNewSupplierModal(false)}
+                className="text-neutral-400 hover:text-neutral-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Название поставщика *
+                </label>
+                <input
+                  type="text"
+                  value={newSupplierName}
+                  onChange={(e) => setNewSupplierName(e.target.value)}
+                  placeholder="ABC Electronics Ltd."
+                  className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Телефон
+                </label>
+                <input
+                  type="tel"
+                  value={newSupplierPhone}
+                  onChange={(e) => setNewSupplierPhone(e.target.value)}
+                  placeholder="+1234567890"
+                  className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={newSupplierEmail}
+                  onChange={(e) => setNewSupplierEmail(e.target.value)}
+                  placeholder="contact@supplier.com"
+                  className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-200 bg-neutral-50">
+              <button
+                type="button"
+                onClick={() => setShowNewSupplierModal(false)}
+                className="px-4 py-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={handleCreateSupplier}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Создать
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

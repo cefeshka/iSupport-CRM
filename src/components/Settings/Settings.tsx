@@ -10,7 +10,8 @@ import {
   Download,
   Shield,
   Activity,
-  ChevronRight
+  ChevronRight,
+  Truck
 } from 'lucide-react';
 import CompanyProfile from './CompanyProfile';
 import ServiceCatalogManager from './ServiceCatalogManager';
@@ -20,8 +21,9 @@ import DocumentTemplates from './DocumentTemplates';
 import DataExport from './DataExport';
 import RolesPermissions from './RolesPermissions';
 import SystemLogs from './SystemLogs';
+import SuppliersManager from './SuppliersManager';
 
-type SettingsTab = 'company' | 'services' | 'team' | 'permissions' | 'sources' | 'templates' | 'logs' | 'export';
+type SettingsTab = 'company' | 'services' | 'suppliers' | 'team' | 'permissions' | 'sources' | 'templates' | 'logs' | 'export';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('company');
@@ -29,6 +31,7 @@ export default function Settings() {
   const tabs = [
     { id: 'company' as SettingsTab, label: 'Профиль компании', icon: Building2, description: 'Реквизиты, брендинг, валюта' },
     { id: 'services' as SettingsTab, label: 'Каталог услуг', icon: Wrench, description: 'Услуги и ремонты' },
+    { id: 'suppliers' as SettingsTab, label: 'Поставщики', icon: Truck, description: 'Управление поставщиками' },
     { id: 'team' as SettingsTab, label: 'Команда', icon: Users, description: 'Сотрудники и роли' },
     { id: 'permissions' as SettingsTab, label: 'Права доступа', icon: Shield, description: 'Управление правами (RBAC)' },
     { id: 'sources' as SettingsTab, label: 'Источники лидов', icon: Target, description: 'Маркетинговые каналы' },
@@ -86,6 +89,7 @@ export default function Settings() {
             <div className="bg-white rounded-lg border border-neutral-200 p-6">
               {activeTab === 'company' && <CompanyProfile />}
               {activeTab === 'services' && <ServiceCatalogManager />}
+              {activeTab === 'suppliers' && <SuppliersManager />}
               {activeTab === 'team' && <UsersManagement />}
               {activeTab === 'permissions' && <RolesPermissions />}
               {activeTab === 'sources' && <LeadSourcesManager />}

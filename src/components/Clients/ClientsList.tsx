@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Search, Phone, Mail, TrendingUp, MessageSquare } from 'lucide-react';
+import { Search, Phone, Mail, TrendingUp, MessageSquare, Plus } from 'lucide-react';
 import { useLocation } from '../../contexts/LocationContext';
+import NewClientModal from './NewClientModal';
 import type { Database } from '../../lib/database.types';
 
 type Client = Database['public']['Tables']['clients']['Row'];
@@ -15,6 +16,7 @@ export default function ClientsList({ onClientClick }: ClientsListProps) {
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showNewClientModal, setShowNewClientModal] = useState(false);
 
   useEffect(() => {
     loadClients();
@@ -76,9 +78,18 @@ export default function ClientsList({ onClientClick }: ClientsListProps) {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-neutral-900">Клиенты</h1>
-        <p className="text-neutral-500 mt-1">База клиентов и история взаимодействий</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-neutral-900">Клиенты</h1>
+          <p className="text-neutral-500 mt-1">База клиентов и история взаимодействий</p>
+        </div>
+        <button
+          onClick={() => setShowNewClientModal(true)}
+          className="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-md flex items-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          New Customer
+        </button>
       </div>
 
       <div className="mb-6">
@@ -180,6 +191,16 @@ export default function ClientsList({ onClientClick }: ClientsListProps) {
           </div>
         )}
       </div>
+
+      {showNewClientModal && (
+        <NewClientModal
+          onClose={() => setShowNewClientModal(false)}
+          onSuccess={() => {
+            setShowNewClientModal(false);
+            loadClients();
+          }}
+        />
+      )}
     </div>
   );
 }
