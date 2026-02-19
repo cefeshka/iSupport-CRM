@@ -41,12 +41,12 @@ export default function InventoryAudit() {
   }, [currentLocation]);
 
   const checkExistingAudit = async () => {
-    if (!currentLocation) return;
+    if (!currentLocation?.id) return;
 
     const { data, error } = await supabase
       .from('stock_audits')
       .select('id, status')
-      .eq('location_id', currentLocation)
+      .eq('location_id', currentLocation.id)
       .eq('status', 'in_progress')
       .maybeSingle();
 
@@ -101,13 +101,13 @@ export default function InventoryAudit() {
   };
 
   const loadInventory = async () => {
-    if (!currentLocation) return;
+    if (!currentLocation?.id) return;
 
     setIsLoading(true);
     const { data, error } = await supabase
       .from('inventory')
       .select('id, part_name, sku, quantity, location')
-      .eq('location_id', currentLocation)
+      .eq('location_id', currentLocation.id)
       .order('part_name');
 
     if (error) {
@@ -122,14 +122,14 @@ export default function InventoryAudit() {
   };
 
   const startNewAudit = async () => {
-    if (!currentLocation || !profile) return;
+    if (!currentLocation?.id || !profile) return;
 
     const auditNumber = `AUD-${Date.now()}`;
 
     const { data: audit, error: auditError } = await supabase
       .from('stock_audits')
       .insert({
-        location_id: currentLocation,
+        location_id: currentLocation.id,
         audit_number: auditNumber,
         status: 'in_progress',
         started_by: profile.id

@@ -30,21 +30,6 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const isDevelopment = import.meta.env.DEV;
 
   useEffect(() => {
-    if (isDevelopment) {
-      console.log('Development mode: Using mock location');
-      const mockLocation: Location = {
-        id: 1,
-        name: 'Development Location',
-        address: 'Mock Address for Development',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      setLocations([mockLocation]);
-      setCurrentLocationState(mockLocation);
-      setLoading(false);
-      return;
-    }
-
     if (profile) {
       loadLocations();
     } else {

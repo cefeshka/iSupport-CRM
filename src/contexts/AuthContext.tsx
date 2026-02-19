@@ -33,8 +33,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (isDevelopment) {
       console.log('Development mode: Using mock admin user');
+      const mockUserId = '00000000-0000-0000-0000-000000000000';
       const mockUser = {
-        id: 'dev-mock-user-id',
+        id: mockUserId,
         email: 'dev@example.com',
         app_metadata: {},
         user_metadata: {},
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } as User;
 
       const mockProfile: Profile = {
-        id: 'dev-mock-user-id',
+        id: mockUserId,
         full_name: 'Development Admin',
         role: 'admin',
         location_id: 1,

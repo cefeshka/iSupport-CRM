@@ -312,14 +312,18 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
           .single();
 
         if (clientError) {
+          toast.dismiss(toastId);
           handleSupabaseError(clientError, 'Create client');
+          setLoading(false);
           return;
         }
         clientId = newClient.id;
       }
 
       if (!stages || stages.length === 0) {
+        toast.dismiss(toastId);
         toast.error('No order stages found. Contact administrator.');
+        setLoading(false);
         return;
       }
 
@@ -349,7 +353,9 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
         .single();
 
       if (orderError) {
+        toast.dismiss(toastId);
         handleSupabaseError(orderError, 'Create order');
+        setLoading(false);
         return;
       }
 
@@ -392,7 +398,9 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
           .insert(orderItems);
 
         if (itemsError) {
+          toast.dismiss(toastId);
           handleSupabaseError(itemsError, 'Add order items');
+          setLoading(false);
           return;
         }
       }
@@ -537,32 +545,26 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
           <div className="border-t border-neutral-200 -mx-6 px-6 py-5 bg-neutral-50">
             <h3 className="text-sm font-semibold text-neutral-900 mb-4">Ierīces informācija</h3>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                  IMEI
-                </label>
-                <SmartDeviceInput
-                  type="imei"
-                  value={deviceIMEI}
-                  onChange={setDeviceIMEI}
-                  onDeviceDetected={handleDeviceDetected}
-                  placeholder="Ievadiet IMEI (15 cipari)"
-                  locationId={currentLocation?.id}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                  Sērijas numurs
-                </label>
-                <SmartDeviceInput
-                  type="serial"
-                  value={deviceSerialNumber}
-                  onChange={setDeviceSerialNumber}
-                  placeholder="Ievadiet sērijas numuru"
-                />
-              </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                IMEI / Serial Number
+              </label>
+              <SmartDeviceInput
+                type="imei"
+                value={deviceIMEI || deviceSerialNumber}
+                onChange={(value) => {
+                  if (value.match(/^\d+$/)) {
+                    setDeviceIMEI(value);
+                    setDeviceSerialNumber('');
+                  } else {
+                    setDeviceSerialNumber(value);
+                    setDeviceIMEI('');
+                  }
+                }}
+                onDeviceDetected={handleDeviceDetected}
+                placeholder="Enter IMEI (15 digits) or Serial Number"
+                locationId={currentLocation?.id}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">

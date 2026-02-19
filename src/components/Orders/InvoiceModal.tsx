@@ -94,7 +94,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
         .insert({
           invoice_number: invoiceNumber,
           order_id: order.id,
-          location_id: currentLocation,
+          location_id: currentLocation?.id,
           client_company_name: formData.clientCompanyName,
           client_registration_number: formData.clientRegistrationNumber,
           client_pvn_number: formData.clientPvnNumber || null,

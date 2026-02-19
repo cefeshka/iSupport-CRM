@@ -29,6 +29,12 @@ export default function DefektacijasAkts({ order, masterName, onClose }: Defekta
     window.print();
   };
 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
     <>
       <style>{`
@@ -97,7 +103,10 @@ export default function DefektacijasAkts({ order, masterName, onClose }: Defekta
         }
       `}</style>
 
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        onClick={handleOverlayClick}
+      >
         <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between p-4 border-b border-neutral-200 no-print">
             <h2 className="text-xl font-bold text-neutral-900">Defektācijas akts</h2>

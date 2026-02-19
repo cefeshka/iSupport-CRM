@@ -38,21 +38,35 @@ export default function AnnouncementAdminPanel() {
     title: '',
     content: '',
     priority: 'normal' as 'normal' | 'high' | 'urgent',
-    pinDuration: 1
+    pinDuration: 1,
+    targetAudience: 'all' as 'all' | 'specific',
+    specificUserId: ''
   });
+
+  const [users, setUsers] = useState<any[]>([]);
 
   useEffect(() => {
     loadAnnouncements();
     loadStats();
+    loadUsers();
   }, [currentLocation]);
 
+  const loadUsers = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, role')
+      .in('role', ['technician', 'manager', 'admin']);
+
+    if (data) setUsers(data);
+  };
+
   const loadAnnouncements = async () => {
-    if (!currentLocation) return;
+    if (!currentLocation?.id) return;
 
     const { data, error } = await supabase
       .from('announcements')
       .select('*')
-      .eq('location_id', currentLocation)
+      .eq('location_id', currentLocation.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -64,12 +78,12 @@ export default function AnnouncementAdminPanel() {
   };
 
   const loadStats = async () => {
-    if (!currentLocation) return;
+    if (!currentLocation?.id) return;
 
     const { data, error } = await supabase
       .from('announcement_stats')
       .select('*')
-      .eq('location_id', currentLocation)
+      .eq('location_id', currentLocation.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -86,8 +100,13 @@ export default function AnnouncementAdminPanel() {
       return;
     }
 
-    if (!currentLocation || !profile?.id) {
+    if (!currentLocation?.id || !profile?.id) {
       toast.error('Kļūda: Nav profila datu');
+      return;
+    }
+
+    if (formData.targetAudience === 'specific' && !formData.specificUserId) {
+      toast.error('Lūdzu, izvēlieties lietotāju');
       return;
     }
 
@@ -101,19 +120,20 @@ export default function AnnouncementAdminPanel() {
         content: formData.content,
         priority: formData.priority,
         expires_at: expiresAt.toISOString(),
-        location_id: currentLocation,
+        location_id: currentLocation.id,
         created_by: profile.id,
+        target_user_id: formData.targetAudience === 'specific' ? formData.specificUserId : null,
         is_active: true
-      } as any);
+      });
 
     if (error) {
       console.error('Error creating announcement:', error);
-      toast.error('Neizdevās izveidot paziņojumu');
+      toast.error(`Neizdevās izveidot paziņojumu: ${error.message}`);
       return;
     }
 
     toast.success('Paziņojums izveidots!');
-    setFormData({ title: '', content: '', priority: 'normal', pinDuration: 1 });
+    setFormData({ title: '', content: '', priority: 'normal', pinDuration: 1, targetAudience: 'all', specificUserId: '' });
     setShowCreateForm(false);
     loadAnnouncements();
     loadStats();
@@ -252,6 +272,40 @@ export default function AnnouncementAdminPanel() {
                 placeholder="Paziņojuma teksts..."
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Adresāts
+              </label>
+              <select
+                value={formData.targetAudience}
+                onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value as any, specificUserId: '' })}
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="all">Visiem māsteriem</option>
+                <option value="specific">Konkrētam māsterim</option>
+              </select>
+            </div>
+
+            {formData.targetAudience === 'specific' && (
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Izvēlēties māsteri
+                </label>
+                <select
+                  value={formData.specificUserId}
+                  onChange={(e) => setFormData({ ...formData, specificUserId: e.target.value })}
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="">-- Izvēlēties --</option>
+                  {users.map(user => (
+                    <option key={user.id} value={user.id}>
+                      {user.full_name} ({user.role})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
