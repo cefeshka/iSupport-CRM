@@ -26,37 +26,61 @@ export function usePermissions() {
   }, [profile?.role]);
 
   const loadPermissions = async () => {
-    if (!profile?.role) return;
-
-    const { data, error } = await supabase
-      .from('role_permissions')
-      .select('*')
-      .eq('role', profile.role);
-
-    if (error) {
-      console.error('Error loading permissions:', error);
+    if (!profile?.role) {
+      console.log('[usePermissions] No profile role available');
       setLoading(false);
       return;
     }
 
-    setPermissions(data || []);
+    console.log('[usePermissions] Loading permissions for role:', profile.role);
 
-    const cache: PermissionsCache = {};
-    (data || []).forEach((perm: Permission) => {
-      const key = `${perm.module}.${perm.action}`;
-      cache[key] = perm.allowed;
-    });
-    setPermissionsCache(cache);
-    setLoading(false);
+    if (profile.role === 'admin' || profile.role === 'owner') {
+      console.log('[usePermissions] Admin/Owner detected - granting all permissions');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('role_permissions')
+        .select('*')
+        .eq('role', profile.role);
+
+      if (error) {
+        console.error('[usePermissions] Error loading permissions:', error);
+        setLoading(false);
+        return;
+      }
+
+      console.log('[usePermissions] Loaded', data?.length || 0, 'permissions');
+      setPermissions(data || []);
+
+      const cache: PermissionsCache = {};
+      (data || []).forEach((perm: Permission) => {
+        const key = `${perm.module}.${perm.action}`;
+        cache[key] = perm.allowed;
+      });
+      setPermissionsCache(cache);
+      setLoading(false);
+    } catch (err) {
+      console.error('[usePermissions] Exception loading permissions:', err);
+      setLoading(false);
+    }
   };
 
   const hasPermission = useCallback((module: string, action: string): boolean => {
-    if (profile?.role === 'admin') {
+    if (profile?.role === 'admin' || profile?.role === 'owner') {
       return true;
     }
 
     const key = `${module}.${action}`;
-    return permissionsCache[key] || false;
+    const allowed = permissionsCache[key] || false;
+
+    if (!allowed && Object.keys(permissionsCache).length > 0) {
+      console.log(`[usePermissions] Permission denied for ${module}.${action} (role: ${profile?.role})`);
+    }
+
+    return allowed;
   }, [profile?.role, permissionsCache]);
 
   const canCreateOrder = useCallback(() => hasPermission('orders', 'create'), [hasPermission]);

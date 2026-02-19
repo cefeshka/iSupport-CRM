@@ -57,6 +57,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       }
 
       console.log('Locations loaded:', data?.length || 0, 'locations');
+      console.log('All locations:', data);
 
       if (data && data.length > 0) {
         setLocations(data);
