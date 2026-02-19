@@ -54,7 +54,9 @@ function AppContent() {
     return <AuthPage />;
   }
 
-  if (!currentLocation && locations.length === 0) {
+  const isDevelopment = import.meta.env.DEV;
+
+  if (!currentLocation && locations.length === 0 && !isDevelopment) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white rounded-xl border-2 border-amber-200 p-6">

@@ -26,8 +26,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const isDevelopment = import.meta.env.DEV;
+
   useEffect(() => {
     console.log('AuthProvider useEffect running');
+
+    if (isDevelopment) {
+      console.log('Development mode: Using mock admin user');
+      const mockUser = {
+        id: 'dev-mock-user-id',
+        email: 'dev@example.com',
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        created_at: new Date().toISOString(),
+      } as User;
+
+      const mockProfile: Profile = {
+        id: 'dev-mock-user-id',
+        full_name: 'Development Admin',
+        role: 'admin',
+        location_id: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      setUser(mockUser);
+      setProfile(mockProfile);
+      setSession({ user: mockUser, access_token: 'mock-token', refresh_token: 'mock-token' } as Session);
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Session loaded:', !!session);
       setSession(session);
