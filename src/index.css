@@ -58,7 +58,7 @@
   }
 
   .modal-body {
-    @apply px-6 py-5 overflow-y-auto scrollbar-thin;
+    @apply px-6 py-5 overflow-y-auto scrollbar-thin max-h-[calc(90vh-200px)];
   }
 
   .modal-footer {

@@ -125,31 +125,31 @@ export default function PurchasesList() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-neutral-50">
-      <div className="bg-white border-b border-neutral-200 px-6 py-4">
-        <div className="flex items-center justify-between mb-4">
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
+      <div className="glass-panel mx-6 mt-6 p-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-semibold text-neutral-900">Закупки</h1>
-            <p className="text-sm text-neutral-600 mt-1">Управление заказами поставщикам</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Закупки</h1>
+            <p className="text-sm text-slate-600 mt-2 font-medium">Управление заказами поставщикам</p>
           </div>
           <button
             onClick={() => setShowNewOrderModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="btn-primary flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Новый заказ поставщику
+            Новый заказ
           </button>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Поиск по номеру заказа, поставщику или трек-номеру..."
-              className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-premium w-full pl-12"
             />
           </div>
 
@@ -158,10 +158,10 @@ export default function PurchasesList() {
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                   statusFilter === status
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50'
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-glow'
+                    : 'bg-white/60 border border-slate-200 text-slate-700 hover:bg-white/80'
                 }`}
               >
                 {status === 'all' ? 'Все' : status} ({count})

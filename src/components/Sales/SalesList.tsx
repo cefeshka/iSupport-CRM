@@ -120,25 +120,25 @@ export default function SalesList() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-panel p-6 mb-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900">Продажи</h1>
-            <p className="text-sm text-neutral-500 mt-1">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Продажи</h1>
+            <p className="text-sm text-slate-600 mt-2 font-medium">
               Управление продажами товаров и аксессуаров
             </p>
           </div>
           <button
             onClick={() => setShowNewSale(true)}
-            className="px-4 py-2 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white rounded-lg hover:from-fuchsia-600 hover:to-pink-600 transition-all shadow-md shadow-fuchsia-500/20 flex items-center gap-2"
+            className="btn-primary flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Новая продажа
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-5 shadow-medium">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-green-600 mb-1">Общая выручка</p>
@@ -150,7 +150,7 @@ export default function SalesList() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl p-5 shadow-medium">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-blue-600 mb-1">Всего продаж</p>

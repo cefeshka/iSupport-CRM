@@ -80,99 +80,101 @@ export default function InventoryList() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex items-start justify-between">
+      <div className="glass-panel p-6 mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-900">Warehouse</h1>
-          <p className="text-neutral-500 mt-1">Inventory and parts management</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Склад</h1>
+          <p className="text-slate-600 mt-2 font-medium">Управление запасами и деталями</p>
         </div>
         <div className="flex items-center gap-3">
           {canEditInventory() && (
             <button
               onClick={() => setShowOutcomeModal(true)}
-              className="px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium flex items-center gap-2"
+              className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all font-medium flex items-center gap-2 shadow-glow"
             >
               <Minus className="w-4 h-4" />
-              Manual Write-off
+              Списать
             </button>
           )}
           {canAddInventory() && (
             <button
               onClick={() => setShowIncomeModal(true)}
-              className="px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center gap-2"
+              className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all font-medium flex items-center gap-2 shadow-glow"
             >
               <Plus className="w-4 h-4" />
-              New Income
+              Приход
             </button>
           )}
         </div>
       </div>
 
       {lowStockItems.length > 0 && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-5 shadow-medium">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5 text-white" />
+            </div>
             <div>
-              <h3 className="font-medium text-amber-900">Low Stock Alert</h3>
-              <p className="text-sm text-amber-700 mt-1">
-                {lowStockItems.length} {lowStockItems.length === 1 ? 'item needs' : 'items need'} restocking
+              <h3 className="font-bold text-amber-900">Низкий запас</h3>
+              <p className="text-sm text-amber-800 mt-1 font-medium">
+                {lowStockItems.length} {lowStockItems.length === 1 ? 'позиция требует' : 'позиций требуют'} пополнения
               </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="mb-6">
+      <div className="mb-6 glass-panel p-4">
         <div className="relative">
-          <Search className="w-5 h-5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or SKU..."
-            className="w-full pl-10 pr-4 py-2.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+            placeholder="Поиск по названию или артикулу..."
+            className="input-premium w-full pl-12"
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+      <div className="table-premium">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-neutral-50 border-b border-neutral-200">
+            <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Part Name
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Название
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  SKU
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Артикул
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Barcode
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Штрихкод
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Stock
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Остаток
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Unit Cost
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Цена
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Location
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Локация
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Supplier
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Поставщик
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Status
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Статус
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody>
               {filteredInventory.map((item) => {
                 const isLowStock = item.quantity <= item.min_quantity;
                 return (
                   <tr
                     key={item.id}
                     onClick={() => setSelectedItem(item)}
-                    className="hover:bg-neutral-50 transition-colors cursor-pointer"
+                    className="hover:bg-white/80 transition-all cursor-pointer"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
