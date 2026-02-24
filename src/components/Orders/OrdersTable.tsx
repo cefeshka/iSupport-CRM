@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Search, Filter, X } from 'lucide-react';
 import { useLocation } from '../../contexts/LocationContext';
 import type { Database } from '../../lib/database.types';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Order = Database['public']['Tables']['orders']['Row'];
 type Client = Database['public']['Tables']['clients']['Row'];
@@ -127,14 +128,15 @@ export default function OrdersTable({ onOrderClick }: OrdersTableProps) {
   }
 
   function getStatusBadge(stage?: OrderStage) {
-    if (!stage) return <span className="px-2 py-1 text-xs rounded-full bg-neutral-100 text-neutral-600">Без статуса</span>;
+    if (!stage) return <span className="px-3 py-1.5 text-xs rounded-lg bg-slate-100 text-slate-600 font-medium">Без статуса</span>;
 
     return (
       <span
-        className="px-2 py-1 text-xs rounded-full font-medium"
+        className="px-3 py-1.5 text-xs rounded-lg font-medium backdrop-blur-sm border"
         style={{
-          backgroundColor: `${stage.color}20`,
-          color: stage.color
+          backgroundColor: `${stage.color}15`,
+          color: stage.color,
+          borderColor: `${stage.color}30`
         }}
       >
         {stage.name}
@@ -145,194 +147,213 @@ export default function OrdersTable({ onOrderClick }: OrdersTableProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="text-neutral-500">Загрузка...</div>
+        <div className="text-slate-400">Загрузка...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="bg-white border-b border-neutral-200 px-6 py-4">
+    <div className="flex flex-col h-full p-6">
+      <div className="bg-white/60 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-medium mb-4 p-4">
         <div className="flex items-center gap-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Поиск по номеру заказа, клиенту, модели, описанию..."
-              className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-12 pr-4 py-3 bg-white/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-slate-900 placeholder-slate-400"
             />
           </div>
 
           <div className="relative">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${
+              className={`px-4 py-3 rounded-xl border transition-all flex items-center gap-2 font-medium ${
                 selectedStatuses.length > 0
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-700'
+                  ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-glow'
+                  : 'border-slate-200 bg-white/80 hover:bg-white text-slate-700'
               }`}
             >
               <Filter className="w-4 h-4" />
               Фильтры
               {selectedStatuses.length > 0 && (
-                <span className="px-1.5 py-0.5 text-xs bg-blue-500 text-white rounded-full">
+                <span className="px-2 py-0.5 text-xs bg-primary-500 text-white rounded-full font-bold">
                   {selectedStatuses.length}
                 </span>
               )}
             </button>
 
-            {showFilters && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-neutral-200 rounded-lg shadow-lg z-50">
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-neutral-900">Фильтр по статусу</h3>
-                    {selectedStatuses.length > 0 && (
-                      <button
-                        onClick={clearFilters}
-                        className="text-sm text-blue-600 hover:text-blue-700"
-                      >
-                        Очистить
-                      </button>
-                    )}
-                  </div>
+            <AnimatePresence>
+              {showFilters && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowFilters(false)}
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-full mt-2 w-72 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-large z-50"
+                  >
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold text-slate-900">Фильтр по статусу</h3>
+                        {selectedStatuses.length > 0 && (
+                          <button
+                            onClick={clearFilters}
+                            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                          >
+                            Очистить
+                          </button>
+                        )}
+                      </div>
 
-                  <div className="space-y-2">
-                    {stages.map((stage) => (
-                      <label
-                        key={stage.id}
-                        className="flex items-center gap-2 cursor-pointer hover:bg-neutral-50 p-2 rounded transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedStatuses.includes(stage.id)}
-                          onChange={() => toggleStatusFilter(stage.id)}
-                          className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span
-                          className="px-2 py-1 text-xs rounded-full font-medium"
-                          style={{
-                            backgroundColor: `${stage.color}20`,
-                            color: stage.color
-                          }}
-                        >
-                          {stage.name}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+                      <div className="space-y-2">
+                        {stages.map((stage) => (
+                          <label
+                            key={stage.id}
+                            className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-3 rounded-xl transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedStatuses.includes(stage.id)}
+                              onChange={() => toggleStatusFilter(stage.id)}
+                              className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            <span
+                              className="px-3 py-1.5 text-xs rounded-lg font-medium"
+                              style={{
+                                backgroundColor: `${stage.color}15`,
+                                color: stage.color
+                              }}
+                            >
+                              {stage.name}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <table className="w-full">
-          <thead className="bg-neutral-50 border-b border-neutral-200 sticky top-0">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                Номер заказа
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                Дата создания
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                Клиент
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                Модель устройства
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                Описание проблемы
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                Статус
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                Сумма
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-neutral-200">
-            {filteredOrders.length === 0 ? (
+      <div className="flex-1 bg-white/60 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-medium overflow-hidden">
+        <div className="overflow-auto h-full scrollbar-thin">
+          <table className="w-full">
+            <thead className="bg-gradient-to-r from-slate-100 to-slate-50 border-b border-slate-200 sticky top-0">
               <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-neutral-500">
-                  {searchQuery || selectedStatuses.length > 0
-                    ? 'Заказы не найдены'
-                    : 'Нет заказов'}
-                </td>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Номер заказа
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Дата создания
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Клиент
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Модель устройства
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Описание проблемы
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Статус
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Сумма
+                </th>
               </tr>
-            ) : (
-              filteredOrders.map((order) => (
-                <tr
-                  key={order.id}
-                  onClick={() => onOrderClick(order)}
-                  className="hover:bg-neutral-50 cursor-pointer transition-colors"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-blue-600">
-                      {order.order_number || `#${order.id.slice(0, 8)}`}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-neutral-900">
-                      {formatDate(order.created_at)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-neutral-900">
-                      {order.client?.full_name || 'Без клиента'}
-                    </div>
-                    {order.client?.phone && (
-                      <div className="text-xs text-neutral-500">{order.client.phone}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-neutral-900">
-                      {order.device_type}
-                    </div>
-                    {order.device_model && (
-                      <div className="text-xs text-neutral-500">{order.device_model}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-neutral-900 max-w-xs truncate">
-                      {order.issue_description}
-                    </div>
-                    {order.waiting_for_parts && (
-                      <div className="mt-1">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
-                          ⏳ Gaida detaļu
-                        </span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(order.stage)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-neutral-900">
-                      {formatCurrency(
-                        order.final_cost ||
-                        (order.subtotal ? order.subtotal - (order.total_discount || 0) : order.estimated_cost)
-                      )}
-                    </div>
+            </thead>
+            <tbody className="bg-white/40 backdrop-blur-sm divide-y divide-slate-100">
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-16 text-center text-slate-500">
+                    {searchQuery || selectedStatuses.length > 0
+                      ? 'Заказы не найдены'
+                      : 'Нет заказов'}
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredOrders.map((order, index) => (
+                  <motion.tr
+                    key={order.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                    onClick={() => onOrderClick(order)}
+                    className="hover:bg-primary-50/50 cursor-pointer transition-all border-b border-slate-100"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-bold text-primary-600">
+                        {order.order_number || `#${order.id.slice(0, 8)}`}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-slate-900">
+                        {formatDate(order.created_at)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-semibold text-slate-900">
+                        {order.client?.full_name || 'Без клиента'}
+                      </div>
+                      {order.client?.phone && (
+                        <div className="text-xs text-slate-500">{order.client.phone}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-slate-900 font-medium">
+                        {order.device_type}
+                      </div>
+                      {order.device_model && (
+                        <div className="text-xs text-slate-500">{order.device_model}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-slate-900 max-w-xs truncate">
+                        {order.issue_description}
+                      </div>
+                      {order.waiting_for_parts && (
+                        <div className="mt-1">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                            ⏳ Gaida detaļu
+                          </span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getStatusBadge(order.stage)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-bold text-slate-900">
+                        {formatCurrency(
+                          order.final_cost ||
+                          (order.subtotal ? order.subtotal - (order.total_discount || 0) : order.estimated_cost)
+                        )}
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div className="bg-white border-t border-neutral-200 px-6 py-4">
-        <div className="text-sm text-neutral-600">
-          Всего заказов: <span className="font-semibold">{filteredOrders.length}</span>
+      <div className="bg-white/60 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-soft px-6 py-4 mt-4">
+        <div className="text-sm text-slate-700">
+          Всего заказов: <span className="font-bold text-slate-900">{filteredOrders.length}</span>
           {filteredOrders.length !== orders.length && (
-            <span className="text-neutral-400"> из {orders.length}</span>
+            <span className="text-slate-400"> из {orders.length}</span>
           )}
         </div>
       </div>

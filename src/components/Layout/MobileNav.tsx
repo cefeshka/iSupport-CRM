@@ -2,6 +2,7 @@ import { LayoutDashboard, FolderKanban, Users, Package, BarChart3, Plus, Shoppin
 import { useLocation } from '../../contexts/LocationContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface MobileNavProps {
   activeView: string;
@@ -28,86 +29,108 @@ export default function MobileNav({ activeView, onViewChange, onQuickAction }: M
   return (
     <>
       {canCreateOrder() && (
-        <div className="fixed bottom-6 right-6 z-50 lg:hidden">
-          <button
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="fixed bottom-24 right-6 z-50 lg:hidden"
+        >
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={onQuickAction}
-            className="w-14 h-14 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white rounded-full shadow-lg shadow-fuchsia-500/30 flex items-center justify-center hover:from-fuchsia-600 hover:to-pink-600 transition-all"
+            className="w-16 h-16 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl shadow-large shadow-primary-500/40 flex items-center justify-center hover:from-primary-600 hover:to-primary-700 transition-all"
           >
-            <Plus className="w-6 h-6" />
-          </button>
-        </div>
+            <Plus className="w-7 h-7" />
+          </motion.button>
+        </motion.div>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 lg:hidden z-40">
-        <div className="flex items-center justify-around px-2 py-2">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-200/60 lg:hidden z-40 shadow-large">
+        <div className="flex items-center justify-around px-2 py-3">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
             return (
-              <button
+              <motion.button
                 key={item.id}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => onViewChange(item.id)}
-                className={`flex items-center justify-center w-12 h-12 rounded-lg transition-colors ${
+                className={`flex items-center justify-center w-12 h-12 rounded-xl transition-all ${
                   isActive
-                    ? 'bg-gradient-to-r from-fuchsia-50 to-pink-50 text-fuchsia-600'
-                    : 'text-neutral-400 hover:text-neutral-900'
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-glow'
+                    : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <Icon className="w-5 h-5" />
-              </button>
+              </motion.button>
             );
           })}
           {canSwitchLocation && (
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={() => setShowLocationModal(true)}
-              className="flex items-center justify-center w-12 h-12 rounded-lg transition-colors text-neutral-400 hover:text-neutral-900"
+              className="flex items-center justify-center w-12 h-12 rounded-xl transition-all text-slate-400 hover:text-slate-900 hover:bg-slate-100"
             >
               <MapPin className="w-5 h-5" />
-            </button>
+            </motion.button>
           )}
         </div>
       </nav>
 
-      {showLocationModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 lg:hidden flex items-end">
-          <div className="bg-white w-full rounded-t-2xl p-4 animate-slide-up">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-neutral-900">Выберите филиал</h3>
-              <button
-                onClick={() => setShowLocationModal(false)}
-                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-neutral-600" />
-              </button>
-            </div>
-
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {locations.map((location) => (
+      <AnimatePresence>
+        {showLocationModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 lg:hidden flex items-end"
+            onClick={() => setShowLocationModal(false)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white/95 backdrop-blur-xl w-full rounded-t-3xl p-6 shadow-large"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-slate-900">Выберите филиал</h3>
                 <button
-                  key={location.id}
-                  onClick={() => {
-                    setCurrentLocation(location);
-                    setShowLocationModal(false);
-                  }}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                    currentLocation?.id === location.id
-                      ? 'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-600'
-                      : 'border-neutral-200 hover:bg-neutral-50 text-neutral-700'
-                  }`}
+                  onClick={() => setShowLocationModal(false)}
+                  className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
                 >
-                  <MapPin className="w-5 h-5 flex-shrink-0" />
-                  <div className="flex-1 text-left">
-                    <div className="font-medium">{location.name}</div>
-                    {location.address && (
-                      <div className="text-sm text-neutral-500">{location.address}</div>
-                    )}
-                  </div>
+                  <X className="w-5 h-5 text-slate-600" />
                 </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+              </div>
+
+              <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-thin">
+                {locations.map((location) => (
+                  <button
+                    key={location.id}
+                    onClick={() => {
+                      setCurrentLocation(location);
+                      setShowLocationModal(false);
+                    }}
+                    className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all ${
+                      currentLocation?.id === location.id
+                        ? 'bg-primary-50 border-primary-200 text-primary-700 shadow-soft'
+                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                    }`}
+                  >
+                    <MapPin className="w-5 h-5 flex-shrink-0" />
+                    <div className="flex-1 text-left">
+                      <div className="font-semibold">{location.name}</div>
+                      {location.address && (
+                        <div className="text-sm text-slate-500">{location.address}</div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

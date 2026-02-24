@@ -3,6 +3,7 @@ import { LayoutGrid, List } from 'lucide-react';
 import OrdersKanban from './OrdersKanban';
 import OrdersTable from './OrdersTable';
 import type { Database } from '../../lib/database.types';
+import { motion } from 'framer-motion';
 
 type Order = Database['public']['Tables']['orders']['Row'];
 type Client = Database['public']['Tables']['clients']['Row'];
@@ -21,18 +22,27 @@ export default function OrdersView({ onOrderClick }: OrdersViewProps) {
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="bg-white border-b border-neutral-200 px-6 py-4">
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white/60 backdrop-blur-xl border-b border-slate-200/60 px-6 py-5 shadow-soft"
+      >
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-neutral-900">Заказы</h1>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+              Заказы
+            </h1>
+            <p className="text-sm text-slate-600 mt-1">Управление заказами и ремонтами</p>
+          </div>
 
-          <div className="flex items-center gap-2 bg-neutral-100 rounded-lg p-1">
+          <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-xl p-1.5 shadow-soft border border-slate-200">
             <button
               onClick={() => setViewMode('kanban')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all ${
                 viewMode === 'kanban'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-neutral-600 hover:text-neutral-900'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-glow'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
               <LayoutGrid className="w-4 h-4" />
@@ -40,10 +50,10 @@ export default function OrdersView({ onOrderClick }: OrdersViewProps) {
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all ${
                 viewMode === 'table'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-neutral-600 hover:text-neutral-900'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-glow'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
               <List className="w-4 h-4" />
@@ -51,7 +61,7 @@ export default function OrdersView({ onOrderClick }: OrdersViewProps) {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="flex-1 overflow-hidden">
         {viewMode === 'kanban' ? (

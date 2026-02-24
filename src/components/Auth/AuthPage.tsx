@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { motion } from 'framer-motion';
 
 export default function AuthPage() {
   const { signIn, signUp } = useAuth();
@@ -30,93 +31,131 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-fuchsia-50 via-white to-pink-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary-900 to-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-500/20 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-primary-600/10 via-transparent to-transparent" />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md relative z-10"
+      >
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center mb-4">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="inline-flex items-center justify-center mb-4"
+          >
             <img
               src="/isupport_png.png"
               alt="iSupport"
-              className="h-16 w-auto object-contain"
+              className="h-20 w-auto object-contain drop-shadow-2xl"
             />
-          </div>
-          <h1 className="text-2xl font-semibold text-neutral-900">iSupport CRM</h1>
-          <p className="text-neutral-500 mt-1">Telefonu un datoru servisa centrs</p>
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-3xl font-bold text-white mb-2"
+          >
+            iSupport CRM
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-slate-300"
+          >
+            Telefonu un datoru servisa centrs
+          </motion.p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-neutral-200 p-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 p-8 shadow-large"
+        >
+          <form onSubmit={handleSubmit} className="space-y-5">
             {isSignUp && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                  <label className="block text-sm font-semibold text-white mb-2">
                     Полное имя
                   </label>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all text-white placeholder-slate-400"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                  <label className="block text-sm font-semibold text-white mb-2">
                     Роль
                   </label>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all text-white"
                   >
-                    <option value="master">Мастер</option>
-                    <option value="manager">Менеджер</option>
+                    <option value="master" className="bg-slate-900">Мастер</option>
+                    <option value="manager" className="bg-slate-900">Менеджер</option>
                   </select>
                 </div>
               </>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+              <label className="block text-sm font-semibold text-white mb-2">
                 Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all text-white placeholder-slate-400"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+              <label className="block text-sm font-semibold text-white mb-2">
                 Пароль
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all text-white placeholder-slate-400"
                 required
                 minLength={6}
               />
             </div>
 
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-red-200 bg-red-500/20 border border-red-400/30 px-4 py-3 rounded-xl backdrop-blur-sm"
+              >
                 {error}
-              </div>
+              </motion.div>
             )}
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white py-2.5 rounded-lg font-medium hover:from-fuchsia-600 hover:to-pink-600 transition-all shadow-md shadow-fuchsia-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3.5 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all shadow-large shadow-primary-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Загрузка...' : isSignUp ? 'Создать аккаунт' : 'Войти'}
-            </button>
+            </motion.button>
           </form>
 
           <button
@@ -124,12 +163,21 @@ export default function AuthPage() {
               setIsSignUp(!isSignUp);
               setError('');
             }}
-            className="w-full mt-4 text-sm text-neutral-600 hover:text-neutral-900"
+            className="w-full mt-5 text-sm text-slate-300 hover:text-white transition-colors font-medium"
           >
             {isSignUp ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
           </button>
-        </div>
-      </div>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          className="text-center text-slate-400 text-sm mt-6"
+        >
+          Secure login powered by Supabase
+        </motion.p>
+      </motion.div>
     </div>
   );
 }
