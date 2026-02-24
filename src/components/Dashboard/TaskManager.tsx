@@ -4,6 +4,8 @@ import { Plus, Calendar, Clock, X, CheckCircle2, Square, CheckSquare, Package, A
 import { useAuth } from '../../contexts/AuthContext';
 import { useLocation } from '../../contexts/LocationContext';
 import type { Database } from '../../lib/database.types';
+import PremiumModal, { PremiumInput, PremiumTextarea, PremiumSelect } from '../common/PremiumModal';
+import { motion } from 'framer-motion';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
 type Order = Database['public']['Tables']['orders']['Row'];
@@ -184,21 +186,23 @@ export default function TaskManager({ tasks, onRefresh }: TaskManagerProps) {
   const incompleteTasks = tasksWithOrders.filter(t => !t.is_completed);
 
   return (
-    <div className="bg-white rounded-lg border border-neutral-200 p-4">
-      <div className="flex items-center justify-between mb-3">
+    <div className="glass-panel p-5">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-neutral-900">Задачи на сегодня</h3>
-          <p className="text-[10px] text-neutral-500 mt-0.5">
+          <h3 className="text-base font-bold text-slate-900">Задачи на сегодня</h3>
+          <p className="text-xs text-slate-500 mt-1">
             {tasksWithOrders.filter(t => t.is_completed).length} / {tasksWithOrders.length} выполнено
           </p>
         </div>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setShowNewTask(true)}
-          className="px-2.5 py-1 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white rounded-lg text-xs hover:from-fuchsia-600 hover:to-pink-600 transition-all shadow-sm shadow-fuchsia-500/20 flex items-center gap-1.5"
+          className="px-3 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl text-xs font-medium hover:from-primary-600 hover:to-primary-700 transition-all shadow-glow flex items-center gap-1.5"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <Plus className="w-4 h-4" />
           Новая
-        </button>
+        </motion.button>
       </div>
 
       <div className="space-y-1.5 max-h-56 overflow-y-auto">
@@ -333,156 +337,136 @@ export default function TaskManager({ tasks, onRefresh }: TaskManagerProps) {
         )}
       </div>
 
-      {showNewTask && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-neutral-900">Новая задача</h3>
-              <button
-                onClick={() => setShowNewTask(false)}
-                className="w-7 h-7 rounded-lg hover:bg-neutral-100 flex items-center justify-center"
-              >
-                <X className="w-4 h-4 text-neutral-500" />
-              </button>
-            </div>
+      <PremiumModal
+        isOpen={showNewTask}
+        onClose={() => setShowNewTask(false)}
+        title="Новая задача"
+        subtitle="Создать напоминание или задачу для команды"
+        maxWidth="md"
+        footer={
+          <>
+            <button
+              onClick={() => setShowNewTask(false)}
+              className="btn-secondary"
+            >
+              Отмена
+            </button>
+            <button
+              onClick={() => createTask(newTaskTitle, newTaskDescription)}
+              disabled={!newTaskTitle.trim()}
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Создать
+            </button>
+          </>
+        }
+      >
+            <div className="space-y-4">
+              <PremiumInput
+                label="Название задачи"
+                required
+                type="text"
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                placeholder="Например: Отзвонить клиенту"
+                autoFocus
+              />
 
-            <div className="space-y-2.5">
-              <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">
-                  Название задачи
-                </label>
-                <input
-                  type="text"
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder="Например: Отзвонить клиенту"
-                  className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  autoFocus
-                />
-              </div>
+              <PremiumTextarea
+                label="Описание"
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                placeholder="Подробности задачи..."
+                rows={3}
+              />
 
-              <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">
-                  Описание (необязательно)
-                </label>
-                <textarea
-                  value={newTaskDescription}
-                  onChange={(e) => setNewTaskDescription(e.target.value)}
-                  placeholder="Подробности задачи..."
-                  className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 h-16 resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 mb-1">
-                    Исполнитель
-                  </label>
-                  <select
-                    value={newTaskAssignee}
-                    onChange={(e) => setNewTaskAssignee(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  >
-                    <option value="">Я</option>
-                    {profiles.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.full_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 mb-1">
-                    Приоритет
-                  </label>
-                  <select
-                    value={newTaskPriority}
-                    onChange={(e) => setNewTaskPriority(e.target.value as 'low' | 'medium' | 'high')}
-                    className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  >
-                    <option value="low">Низкий</option>
-                    <option value="medium">Средний</option>
-                    <option value="high">Высокий</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">
-                  Связать с заказом (необязательно)
-                </label>
-                <select
-                  value={newTaskOrderId}
-                  onChange={(e) => setNewTaskOrderId(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+              <div className="grid grid-cols-2 gap-3">
+                <PremiumSelect
+                  label="Исполнитель"
+                  value={newTaskAssignee}
+                  onChange={(e) => setNewTaskAssignee(e.target.value)}
                 >
-                  <option value="">Без привязки к заказу</option>
-                  {orders.map((order) => (
-                    <option key={order.id} value={order.id}>
-                      {order.device_type} {order.device_model || ''}
-                      {(order as any).clients?.full_name && ` — ${(order as any).clients.full_name}`}
+                  <option value="">Я</option>
+                  {profiles.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.full_name}
                     </option>
                   ))}
-                </select>
-              </div>
+                </PremiumSelect>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 mb-1">
-                    Дата выполнения
-                  </label>
-                  <input
-                    type="date"
-                    value={newTaskDate}
-                    onChange={(e) => setNewTaskDate(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-neutral-700 mb-1">
-                    Время
-                  </label>
-                  <input
-                    type="time"
-                    value={newTaskTime}
-                    onChange={(e) => setNewTaskTime(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-1.5">
-                <button
-                  onClick={() => setShowNewTask(false)}
-                  className="flex-1 px-3 py-1.5 text-xs border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+                <PremiumSelect
+                  label="Приоритет"
+                  value={newTaskPriority}
+                  onChange={(e) => setNewTaskPriority(e.target.value as 'low' | 'medium' | 'high')}
                 >
-                  Отмена
-                </button>
-                <button
-                  onClick={() => createTask(newTaskTitle, newTaskDescription)}
-                  disabled={!newTaskTitle.trim()}
-                  className="flex-1 px-3 py-1.5 text-xs bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white rounded-lg hover:from-fuchsia-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Создать
-                </button>
+                  <option value="low">Низкий</option>
+                  <option value="medium">Средний</option>
+                  <option value="high">Высокий</option>
+                </PremiumSelect>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {showDetailTask && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-neutral-900">Детали задачи</h3>
-              <button
-                onClick={() => setShowDetailTask(null)}
-                className="w-7 h-7 rounded-lg hover:bg-neutral-100 flex items-center justify-center"
+              <PremiumSelect
+                label="Связать с заказом"
+                value={newTaskOrderId}
+                onChange={(e) => setNewTaskOrderId(e.target.value)}
               >
-                <X className="w-4 h-4 text-neutral-500" />
-              </button>
+                <option value="">Без привязки к заказу</option>
+                {orders.map((order) => (
+                  <option key={order.id} value={order.id}>
+                    {order.device_type} {order.device_model || ''}
+                    {(order as any).clients?.full_name && ` — ${(order as any).clients.full_name}`}
+                  </option>
+                ))}
+              </PremiumSelect>
+
+              <div className="grid grid-cols-2 gap-3">
+                <PremiumInput
+                  label="Дата выполнения"
+                  type="date"
+                  value={newTaskDate}
+                  onChange={(e) => setNewTaskDate(e.target.value)}
+                />
+
+                <PremiumInput
+                  label="Время"
+                  type="time"
+                  value={newTaskTime}
+                  onChange={(e) => setNewTaskTime(e.target.value)}
+                />
+              </div>
             </div>
+      </PremiumModal>
+
+      <PremiumModal
+        isOpen={!!showDetailTask}
+        onClose={() => setShowDetailTask(null)}
+        title="Детали задачи"
+        subtitle="Просмотр и управление задачей"
+        maxWidth="md"
+        footer={
+          <>
+            <button
+              onClick={() => showDetailTask && deleteTask(showDetailTask.id)}
+              className="btn-secondary text-red-600 hover:bg-red-50 border-red-200"
+            >
+              Удалить
+            </button>
+            <button
+              onClick={() => {
+                if (showDetailTask) {
+                  toggleTask(showDetailTask.id, showDetailTask.is_completed);
+                  setShowDetailTask(null);
+                }
+              }}
+              className="btn-primary flex items-center gap-2"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Выполнено
+            </button>
+          </>
+        }
+      >
+        {showDetailTask && (
 
             <div className="space-y-3">
               <div>
@@ -523,77 +507,42 @@ export default function TaskManager({ tasks, onRefresh }: TaskManagerProps) {
                 )}
               </div>
 
-              <div className="flex gap-2 pt-1.5">
-                <button
-                  onClick={() => deleteTask(showDetailTask.id)}
-                  className="flex-1 px-3 py-1.5 text-xs border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-                >
-                  Удалить
-                </button>
-                <button
-                  onClick={() => {
-                    toggleTask(showDetailTask.id, showDetailTask.is_completed);
-                    setShowDetailTask(null);
-                  }}
-                  className="flex-1 px-3 py-1.5 text-xs bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white rounded-lg hover:from-fuchsia-600 hover:to-pink-600 transition-all flex items-center justify-center gap-1.5"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Выполнено
-                </button>
-              </div>
             </div>
-          </div>
-        </div>
-      )}
+        )}
+      </PremiumModal>
 
-      {showPostpone && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-sm w-full p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-neutral-900">Отложить задачу</h3>
-              <button
-                onClick={() => setShowPostpone(null)}
-                className="w-7 h-7 rounded-lg hover:bg-neutral-100 flex items-center justify-center"
-              >
-                <X className="w-4 h-4 text-neutral-500" />
-              </button>
-            </div>
-
-            <p className="text-xs text-neutral-600 mb-3">{showPostpone.title}</p>
-
-            <div className="space-y-2.5">
-              <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">
-                  Перенести на дату
-                </label>
-                <input
-                  type="date"
-                  value={postponeDate}
-                  onChange={(e) => setPostponeDate(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setShowPostpone(null)}
-                  className="flex-1 px-3 py-1.5 text-xs border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
-                >
-                  Отмена
-                </button>
-                <button
-                  onClick={postponeTask}
-                  disabled={!postponeDate}
-                  className="flex-1 px-3 py-1.5 text-xs bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white rounded-lg hover:from-fuchsia-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Отложить
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <PremiumModal
+        isOpen={!!showPostpone}
+        onClose={() => setShowPostpone(null)}
+        title="Отложить задачу"
+        subtitle={showPostpone?.title}
+        maxWidth="sm"
+        footer={
+          <>
+            <button
+              onClick={() => setShowPostpone(null)}
+              className="btn-secondary"
+            >
+              Отмена
+            </button>
+            <button
+              onClick={postponeTask}
+              disabled={!postponeDate}
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Отложить
+            </button>
+          </>
+        }
+      >
+        <PremiumInput
+          label="Перенести на дату"
+          type="date"
+          value={postponeDate}
+          onChange={(e) => setPostponeDate(e.target.value)}
+          min={new Date().toISOString().split('T')[0]}
+        />
+      </PremiumModal>
     </div>
   );
 }

@@ -10,9 +10,11 @@ interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
   onQuickAction: () => void;
+  unreadTaskCount?: number;
+  unreadAnnouncementCount?: number;
 }
 
-export default function Sidebar({ activeView, onViewChange, onQuickAction }: SidebarProps) {
+export default function Sidebar({ activeView, onViewChange, onQuickAction, unreadTaskCount = 0, unreadAnnouncementCount = 0 }: SidebarProps) {
   const { profile, signOut, isAdmin } = useAuth();
   const { locations, currentLocation, setCurrentLocation, canSwitchLocation } = useLocation();
   const { language, setLanguage, t } = useLanguage();
@@ -50,13 +52,17 @@ export default function Sidebar({ activeView, onViewChange, onQuickAction }: Sid
             <img
               src="/isupport_png.png"
               alt="iSupport"
-              className="h-10 w-auto object-contain drop-shadow-lg"
+              className="h-12 w-auto object-contain drop-shadow-lg"
             />
-            <div>
-              <h1 className="font-semibold text-white">iSupport CRM</h1>
-              <p className="text-xs text-slate-400">{profile?.full_name}</p>
-            </div>
           </div>
+          {profile?.full_name && (
+            <div className="mt-3 px-2">
+              <p className="text-sm font-medium text-white">{profile.full_name}</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {profile.role === 'admin' ? 'Администратор' : profile.role === 'technician' ? 'Мастер' : 'Сотрудник'}
+              </p>
+            </div>
+          )}
         </div>
 
         {canCreateOrder() && (
@@ -144,6 +150,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAction }: Sid
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
+            const badgeCount = item.id === 'dashboard' ? (unreadTaskCount + unreadAnnouncementCount) : 0;
             return (
               <motion.button
                 key={item.id}
@@ -157,7 +164,16 @@ export default function Sidebar({ activeView, onViewChange, onQuickAction }: Sid
                 }`}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-sm">{item.label}</span>
+                <span className="text-sm flex-1 text-left">{item.label}</span>
+                {badgeCount > 0 && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="min-w-[20px] h-5 px-1.5 bg-red-500 rounded-full flex items-center justify-center shadow-glow"
+                  >
+                    <span className="text-white font-bold text-xs">{badgeCount}</span>
+                  </motion.div>
+                )}
               </motion.button>
             );
           })}

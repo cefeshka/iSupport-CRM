@@ -80,11 +80,11 @@ export default function AnnouncementWidget({ onUrgentAnnouncement }: Announcemen
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case 'urgent':
-        return <AlertTriangle className="w-5 h-5 text-red-600" />;
+        return <AlertTriangle className="w-4 h-4 text-red-600" />;
       case 'high':
-        return <AlertTriangle className="w-5 h-5 text-amber-600" />;
+        return <AlertTriangle className="w-4 h-4 text-orange-600" />;
       default:
-        return <Info className="w-5 h-5 text-blue-600" />;
+        return <Info className="w-4 h-4 text-green-600" />;
     }
   };
 
@@ -106,9 +106,9 @@ export default function AnnouncementWidget({ onUrgentAnnouncement }: Announcemen
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'urgent':
-        return <span className="text-xs px-2 py-1 rounded-full bg-red-200 text-red-800 font-bold">URGENT</span>;
+        return <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-red-500 text-white font-bold">!</span>;
       case 'high':
-        return <span className="text-xs px-2 py-1 rounded-full bg-amber-200 text-amber-800 font-semibold">Augsta</span>;
+        return <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-orange-500 text-white font-semibold">!</span>;
       default:
         return null;
     }
@@ -135,71 +135,56 @@ export default function AnnouncementWidget({ onUrgentAnnouncement }: Announcemen
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
-        <div className="flex items-center gap-3 text-white">
-          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-            <Bell className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold">Paziņojumi</h2>
-            {unreadAnnouncements.length > 0 && (
-              <p className="text-sm text-purple-100">
-                {unreadAnnouncements.length} {unreadAnnouncements.length === 1 ? 'neizlasīts' : 'neizlasīti'}
-              </p>
-            )}
-          </div>
+    <div className="glass-panel overflow-hidden">
+      <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-3">
+        <div className="flex items-center gap-2 text-white">
+          <Bell className="w-4 h-4" />
+          <h2 className="text-sm font-bold">Уведомления</h2>
           {unreadAnnouncements.length > 0 && (
-            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">{unreadAnnouncements.length}</span>
+            <div className="ml-auto w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-glow">
+              <span className="text-white font-bold text-xs">{unreadAnnouncements.length}</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+      <div className="p-3 space-y-2 max-h-48 overflow-y-auto scrollbar-thin">
         {announcements.map((announcement) => (
           <div
             key={announcement.id}
-            className={`rounded-lg p-4 border transition-all ${getPriorityStyles(announcement.priority, announcement.is_read)} ${
-              announcement.is_read ? 'opacity-70' : ''
+            className={`rounded-xl p-2.5 border transition-all ${getPriorityStyles(announcement.priority, announcement.is_read)} ${
+              announcement.is_read ? 'opacity-60' : ''
             }`}
           >
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 mt-1">
+            <div className="flex items-start gap-2">
+              <div className="flex-shrink-0">
                 {getPriorityIcon(announcement.priority)}
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className={`font-semibold ${announcement.is_read ? 'text-neutral-600' : 'text-neutral-900'}`}>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <h3 className={`text-xs font-bold ${announcement.is_read ? 'text-neutral-600' : 'text-neutral-900'}`}>
                     {announcement.title}
                   </h3>
                   {getPriorityBadge(announcement.priority)}
-                  {announcement.is_read && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" />
-                      Izlasīts
-                    </span>
-                  )}
                 </div>
 
-                <p className={`text-sm mb-2 ${announcement.is_read ? 'text-neutral-500' : 'text-neutral-700'}`}>
+                <p className={`text-[10px] mb-1.5 line-clamp-2 ${announcement.is_read ? 'text-neutral-500' : 'text-neutral-700'}`}>
                   {announcement.content}
                 </p>
 
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-neutral-500">
-                    {announcement.creator_name} • {new Date(announcement.created_at).toLocaleDateString('lv-LV')}
+                  <div className="text-[9px] text-neutral-400">
+                    {announcement.creator_name}
                   </div>
 
                   {!announcement.is_read && (
                     <button
                       onClick={() => markAsRead(announcement.id)}
-                      className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs font-medium flex items-center gap-1"
+                      className="px-2 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[10px] font-medium flex items-center gap-0.5"
                     >
-                      <CheckCircle className="w-3 h-3" />
-                      Izlasīju
+                      <CheckCircle className="w-2.5 h-2.5" />
+                      OK
                     </button>
                   )}
                 </div>

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ColorOption {
   name: string;
@@ -79,57 +81,73 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
   const handleColorSelect = (color: ColorOption) => {
     onChange(color.value);
-    setIsOpen(false);
   };
 
   const selectedColor = COLOR_OPTIONS.find(c => c.value === value);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-semibold text-slate-700">
           {label}
         </label>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Ievadiet krāsu"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input-premium w-full"
         />
 
-        <div className="flex flex-wrap gap-2">
-          {COLOR_OPTIONS.map((color) => (
-            <button
-              key={color.value}
-              type="button"
-              onClick={() => handleColorSelect(color)}
-              className={`
-                px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-                ${color.bgColor} ${color.textColor}
-                ${color.borderColor ? `border ${color.borderColor}` : ''}
-                ${value === color.value ? 'ring-2 ring-blue-500 ring-offset-2' : 'hover:scale-105'}
-                shadow-sm hover:shadow-md
-              `}
-              title={`Izvēlēties ${color.name}`}
-            >
-              {color.name}
-            </button>
-          ))}
+        <div className="form-section p-4">
+          <p className="text-xs font-medium text-slate-600 mb-3">Быстрый выбор:</p>
+          <div className="grid grid-cols-5 gap-2">
+            {COLOR_OPTIONS.map((color) => (
+              <motion.button
+                key={color.value}
+                type="button"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleColorSelect(color)}
+                className={`
+                  relative px-3 py-2.5 rounded-xl text-xs font-semibold transition-all
+                  ${color.bgColor} ${color.textColor}
+                  ${color.borderColor ? `border-2 ${color.borderColor}` : 'border-2 border-transparent'}
+                  ${value === color.value ? 'ring-2 ring-primary-500 ring-offset-2 shadow-glow' : 'hover:shadow-medium'}
+                `}
+                title={`Izvēlēties ${color.name}`}
+              >
+                {value === color.value && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute top-0 right-0 -mt-1 -mr-1"
+                  >
+                    <div className="bg-primary-500 rounded-full p-0.5">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                  </motion.div>
+                )}
+                {color.name}
+              </motion.button>
+            ))}
+          </div>
         </div>
       </div>
 
       {value && (
-        <div className="text-xs text-gray-500">
-          Izvēlēta krāsa: <span className="font-medium text-gray-700">{value}</span>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-lg"
+        >
+          Izvēlēta krāsa: <span className="font-semibold text-slate-900">{value}</span>
+        </motion.div>
       )}
     </div>
   );

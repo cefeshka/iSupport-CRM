@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Plus, Pencil, Trash2, Phone, Mail, Building2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { toast, handleSupabaseError } from '../../lib/toast';
+import PremiumModal, { PremiumInput, PremiumTextarea } from '../common/PremiumModal';
 
 interface Supplier {
   id: string;
@@ -239,105 +240,75 @@ export default function SuppliersManager() {
         )}
       </div>
 
-      {showModal && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={(e) => e.target === e.currentTarget && closeModal()}
-        >
-          <div className="bg-white rounded-2xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-neutral-200">
-              <h2 className="text-xl font-semibold text-neutral-900">
-                {editingSupplier ? 'Edit Supplier' : 'New Supplier'}
-              </h2>
-            </div>
+      <PremiumModal
+        isOpen={showModal}
+        onClose={closeModal}
+        title={editingSupplier ? 'Редактировать поставщика' : 'Новый поставщик'}
+        subtitle="Управление контактными данными поставщика"
+        maxWidth="md"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={closeModal}
+              className="btn-secondary"
+            >
+              Отмена
+            </button>
+            <button
+              type="submit"
+              form="supplier-form"
+              className="btn-primary"
+            >
+              {editingSupplier ? 'Обновить' : 'Создать'}
+            </button>
+          </>
+        }
+      >
+        <form id="supplier-form" onSubmit={handleSubmit} className="space-y-4">
+          <PremiumInput
+            label="Название поставщика"
+            required
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="ABC Electronics Ltd."
+            autoFocus
+          />
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                  Supplier Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="ABC Electronics Ltd."
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                  autoFocus
-                />
-              </div>
+          <PremiumInput
+            label="Контактное лицо"
+            type="text"
+            value={formData.contact_person}
+            onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
+            placeholder="Иван Иванов"
+          />
 
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                  Contact Person
-                </label>
-                <input
-                  type="text"
-                  value={formData.contact_person}
-                  onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
-                  placeholder="John Smith"
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+          <PremiumInput
+            label="Телефон"
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            placeholder="+1234567890"
+          />
 
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+1234567890"
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+          <PremiumInput
+            label="Email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            placeholder="contact@supplier.com"
+          />
 
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="contact@supplier.com"
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                  Notes
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="Additional notes about this supplier..."
-                  rows={3}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 px-4 py-2.5 border border-neutral-200 rounded-lg font-medium hover:bg-neutral-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                >
-                  {editingSupplier ? 'Update' : 'Create'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          <PremiumTextarea
+            label="Заметки"
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            placeholder="Дополнительная информация о поставщике..."
+            rows={3}
+          />
+        </form>
+      </PremiumModal>
     </div>
   );
 }
