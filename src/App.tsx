@@ -44,8 +44,8 @@ function AppContent() {
 
   if (loading || locationLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="text-neutral-500">Загрузка...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary-900 to-slate-950 flex items-center justify-center">
+        <div className="text-slate-300">Загрузка...</div>
       </div>
     );
   }
@@ -58,23 +58,23 @@ function AppContent() {
 
   if (!currentLocation && locations.length === 0 && !isDevelopment) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-xl border-2 border-amber-200 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-              <AlertCircle className="w-6 h-6 text-amber-600" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary-900 to-slate-950 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-large">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-14 h-14 bg-amber-500/20 rounded-xl flex items-center justify-center border border-amber-400/30">
+              <AlertCircle className="w-7 h-7 text-amber-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-neutral-900">No Location Found</h2>
-              <p className="text-sm text-neutral-500">Setup required</p>
+              <h2 className="text-xl font-semibold text-white">No Location Found</h2>
+              <p className="text-sm text-slate-400">Setup required</p>
             </div>
           </div>
-          <p className="text-sm text-neutral-600 mb-4">
+          <p className="text-sm text-slate-300 mb-6">
             No locations have been created in the system yet. {isAdmin() ? 'Please create a location in Settings to continue.' : 'Please contact your administrator to set up locations.'}
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
+            className="w-full px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all text-sm font-medium shadow-glow"
           >
             Refresh Page
           </button>
@@ -115,7 +115,7 @@ function AppContent() {
   }
 
   return (
-    <div className="flex h-screen bg-neutral-50 overflow-hidden">
+    <div className="flex h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 overflow-hidden">
       <div className="hidden lg:block">
         <Sidebar
           activeView={activeView}

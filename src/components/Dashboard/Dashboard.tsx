@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Calendar, Euro, CreditCard, Wallet, CircleDollarSign, TrendingUp } from 'lucide-react';
+import { Calendar, Euro, CreditCard, Wallet, CircleDollarSign, TrendingUp, Package, UserCheck, Wrench, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLocation } from '../../contexts/LocationContext';
 import TaskManager from './TaskManager';
@@ -11,6 +11,7 @@ import AnnouncementWidget from './AnnouncementWidget';
 import AnnouncementAdminPanel from './AnnouncementAdminPanel';
 import UrgentAnnouncementModal from './UrgentAnnouncementModal';
 import type { Database } from '../../lib/database.types';
+import { motion } from 'framer-motion';
 
 type Order = Database['public']['Tables']['orders']['Row'];
 type OrderItem = Database['public']['Tables']['order_items']['Row'];
@@ -264,147 +265,257 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-neutral-500">Загрузка...</div>
+        <div className="text-slate-400">Загрузка...</div>
       </div>
     );
   }
 
+  const totalProfit = stats.devicesProfit + stats.accessoriesProfit;
+  const totalCash = stats.paymentMethods.bank.totalAmount + stats.paymentMethods.cash.totalAmount + stats.paymentMethods.bs_cash.totalAmount;
+  const totalCashProfit = stats.paymentMethods.bank.profit + stats.paymentMethods.cash.profit + stats.paymentMethods.bs_cash.profit;
+
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-neutral-900">Рабочий стол</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">Добро пожаловать, {profile?.full_name}</p>
-        </div>
-
-        <div className="flex items-center gap-2 bg-white border border-neutral-200 rounded-lg px-3 py-1.5">
-          <Calendar className="w-4 h-4 text-neutral-400" />
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="border-none outline-none text-sm text-neutral-900 font-medium"
-          />
-        </div>
-      </div>
-
-      <AnnouncementWidget
-        onUrgentAnnouncement={(announcement) => {
-          setUrgentAnnouncement(announcement);
-          setShowUrgentModal(true);
-        }}
-      />
-
-      {(isAdmin() || profile?.role === 'owner' || profile?.role === 'manager') && (
-        <AnnouncementAdminPanel />
-      )}
-
-      <TechnicianPerformance refreshTrigger={refreshTrigger} />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        <DashboardStats stats={stats} />
-
-        <div className="relative bg-white border border-neutral-200 rounded-lg p-3">
-          <div className="relative h-full flex flex-col">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-blue-500 rounded-lg">
-                <Euro className="w-4 h-4 text-white" />
-              </div>
-              <h3 className="text-xs font-bold text-neutral-800">Кассы за день</h3>
-            </div>
-
-            <div className="space-y-2 mb-2 flex-1">
-              <div className="flex items-center justify-between p-1.5 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100">
-                <div className="flex items-center gap-1.5">
-                  <div className="p-1 bg-blue-500 rounded-md">
-                    <CreditCard className="w-3 h-3 text-white" />
-                  </div>
-                  <span className="text-[10px] font-semibold text-neutral-700">Банк</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs font-bold text-neutral-900">{stats.paymentMethods.bank.totalAmount.toFixed(2)} €</div>
-                  <div className="flex items-center gap-0.5 text-[9px] text-green-600 font-medium">
-                    <TrendingUp className="w-2.5 h-2.5" />
-                    {stats.paymentMethods.bank.profit.toFixed(2)} €
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-1.5 rounded-lg bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-100">
-                <div className="flex items-center gap-1.5">
-                  <div className="p-1 bg-emerald-500 rounded-md">
-                    <Wallet className="w-3 h-3 text-white" />
-                  </div>
-                  <span className="text-[10px] font-semibold text-neutral-700">Касса</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs font-bold text-neutral-900">{stats.paymentMethods.cash.totalAmount.toFixed(2)} €</div>
-                  <div className="flex items-center gap-0.5 text-[9px] text-green-600 font-medium">
-                    <TrendingUp className="w-2.5 h-2.5" />
-                    {stats.paymentMethods.cash.profit.toFixed(2)} €
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-1.5 rounded-lg bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-100">
-                <div className="flex items-center gap-1.5">
-                  <div className="p-1 bg-violet-500 rounded-md">
-                    <CircleDollarSign className="w-3 h-3 text-white" />
-                  </div>
-                  <span className="text-[10px] font-semibold text-neutral-700">БС</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs font-bold text-neutral-900">{stats.paymentMethods.bs_cash.totalAmount.toFixed(2)} €</div>
-                  <div className="flex items-center gap-0.5 text-[9px] text-green-600 font-medium">
-                    <TrendingUp className="w-2.5 h-2.5" />
-                    {stats.paymentMethods.bs_cash.profit.toFixed(2)} €
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-neutral-200 mt-auto">
-              <div className="flex items-center justify-between p-1.5 rounded-lg bg-neutral-50">
-                <span className="text-[10px] font-bold text-neutral-800 flex items-center gap-1">
-                  <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
-                  Всего
-                </span>
-                <div className="text-right">
-                  <div className="text-base font-extrabold text-neutral-900">
-                    {(stats.paymentMethods.bank.totalAmount + stats.paymentMethods.cash.totalAmount + stats.paymentMethods.bs_cash.totalAmount).toFixed(2)} €
-                  </div>
-                  <div className="text-[9px] text-green-600 font-bold flex items-center justify-end gap-0.5">
-                    <TrendingUp className="w-2.5 h-2.5" />
-                    {(stats.paymentMethods.bank.profit + stats.paymentMethods.cash.profit + stats.paymentMethods.bs_cash.profit).toFixed(2)} €
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ExpectedDeliveries />
-        <TaskManager tasks={tasks} onRefresh={loadDashboardData} />
-      </div>
-
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <div className="flex items-start gap-2">
-          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <TrendingUp className="w-4 h-4 text-blue-600" />
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 p-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between flex-wrap gap-4"
+        >
           <div>
-            <h3 className="text-sm font-medium text-blue-900">
-              Сводка за {new Date(selectedDate).toLocaleDateString('ru-RU')}
-            </h3>
-            <p className="text-xs text-blue-700 mt-0.5">
-              Принято {stats.devicesAccepted} устройств, закрыто {stats.devicesClosed}.
-              Продано {stats.accessoriesSold} аксессуаров.
-              Общая прибыль составила {(stats.devicesProfit + stats.accessoriesProfit).toFixed(2)} €.
-            </p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+              Рабочий стол
+            </h1>
+            <p className="text-slate-600 mt-1">Добро пожаловать, {profile?.full_name}</p>
           </div>
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="flex items-center gap-3 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl px-4 py-2 shadow-soft"
+          >
+            <Calendar className="w-5 h-5 text-primary-500" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="border-none outline-none text-sm text-slate-900 font-medium bg-transparent"
+            />
+          </motion.div>
+        </motion.div>
+
+        <AnnouncementWidget
+          onUrgentAnnouncement={(announcement) => {
+            setUrgentAnnouncement(announcement);
+            setShowUrgentModal(true);
+          }}
+        />
+
+        {(isAdmin() || profile?.role === 'owner' || profile?.role === 'manager') && (
+          <AnnouncementAdminPanel />
+        )}
+
+        <TechnicianPerformance refreshTrigger={refreshTrigger} />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gradient-to-br from-white to-slate-50 border border-slate-200/60 rounded-2xl p-6 shadow-medium hover:shadow-large transition-all"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-glow">
+                <Package className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-slate-900">{stats.devicesAccepted}</div>
+                <div className="text-xs text-slate-500 mt-1">Принято</div>
+              </div>
+            </div>
+            {stats.yesterdayAccepted !== undefined && (
+              <div className="text-xs text-slate-600">
+                Вчера: <span className="font-semibold">{stats.yesterdayAccepted}</span>
+              </div>
+            )}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="bg-gradient-to-br from-white to-emerald-50 border border-emerald-200/60 rounded-2xl p-6 shadow-medium hover:shadow-large transition-all"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg shadow-emerald-500/30">
+                <UserCheck className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-slate-900">{stats.devicesClosed}</div>
+                <div className="text-xs text-slate-500 mt-1">Закрыто</div>
+              </div>
+            </div>
+            {stats.yesterdayClosed !== undefined && (
+              <div className="text-xs text-slate-600">
+                Вчера: <span className="font-semibold">{stats.yesterdayClosed}</span>
+              </div>
+            )}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gradient-to-br from-white to-blue-50 border border-blue-200/60 rounded-2xl p-6 shadow-medium hover:shadow-large transition-all"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg shadow-blue-500/30">
+                <Wrench className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-slate-900">{stats.devicesProfit.toFixed(2)} €</div>
+                <div className="text-xs text-slate-500 mt-1">Прибыль (услуги)</div>
+              </div>
+            </div>
+            {stats.topRepair && (
+              <div className="text-xs text-slate-600 truncate">
+                Топ: <span className="font-semibold">{stats.topRepair}</span>
+              </div>
+            )}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4 }}
+            className="bg-gradient-to-br from-white to-amber-50 border border-amber-200/60 rounded-2xl p-6 shadow-medium hover:shadow-large transition-all"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg shadow-amber-500/30">
+                <ShoppingBag className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-slate-900">{stats.accessoriesProfit.toFixed(2)} €</div>
+                <div className="text-xs text-slate-500 mt-1">Прибыль (товары)</div>
+              </div>
+            </div>
+            <div className="text-xs text-slate-600">
+              Продано: <span className="font-semibold">{stats.accessoriesSold} шт</span>
+            </div>
+          </motion.div>
         </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="lg:col-span-1 bg-gradient-to-br from-white to-slate-50 border border-slate-200/60 rounded-2xl p-6 shadow-medium"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl">
+                <Euro className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">Кассы за день</h3>
+            </div>
+
+            <div className="space-y-3 mb-4">
+              <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-blue-500 rounded-lg">
+                      <CreditCard className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">Банк</span>
+                  </div>
+                  <div className="text-xl font-bold text-slate-900">{stats.paymentMethods.bank.totalAmount.toFixed(2)} €</div>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                  <TrendingUp className="w-3 h-3" />
+                  Прибыль: {stats.paymentMethods.bank.profit.toFixed(2)} €
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-emerald-500 rounded-lg">
+                      <Wallet className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">Касса</span>
+                  </div>
+                  <div className="text-xl font-bold text-slate-900">{stats.paymentMethods.cash.totalAmount.toFixed(2)} €</div>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                  <TrendingUp className="w-3 h-3" />
+                  Прибыль: {stats.paymentMethods.cash.profit.toFixed(2)} €
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-violet-500 rounded-lg">
+                      <CircleDollarSign className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">БС</span>
+                  </div>
+                  <div className="text-xl font-bold text-slate-900">{stats.paymentMethods.bs_cash.totalAmount.toFixed(2)} €</div>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                  <TrendingUp className="w-3 h-3" />
+                  Прибыль: {stats.paymentMethods.bs_cash.profit.toFixed(2)} €
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-200">
+              <div className="p-4 rounded-xl bg-gradient-to-r from-slate-100 to-slate-50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-slate-800">Всего за день</span>
+                  <div className="text-2xl font-extrabold text-slate-900">{totalCash.toFixed(2)} €</div>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-emerald-600 font-bold">
+                  <TrendingUp className="w-3 h-3" />
+                  Общая прибыль: {totalCashProfit.toFixed(2)} €
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4"
+          >
+            <ExpectedDeliveries />
+            <TaskManager tasks={tasks} onRefresh={loadDashboardData} />
+          </motion.div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="bg-gradient-to-r from-primary-50 to-blue-50 border border-primary-200 rounded-2xl p-6 shadow-soft"
+        >
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-glow flex-shrink-0">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                Сводка за {new Date(selectedDate).toLocaleDateString('ru-RU')}
+              </h3>
+              <p className="text-slate-700">
+                Принято <span className="font-bold text-primary-600">{stats.devicesAccepted}</span> устройств,
+                закрыто <span className="font-bold text-emerald-600">{stats.devicesClosed}</span>.
+                Продано <span className="font-bold text-amber-600">{stats.accessoriesSold}</span> аксессуаров.
+                Общая прибыль составила <span className="font-bold text-slate-900">{totalProfit.toFixed(2)} €</span>.
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {showUrgentModal && urgentAnnouncement && (
