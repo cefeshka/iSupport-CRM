@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { X } from 'lucide-react';
 import { useLocation } from '../../contexts/LocationContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { toast, handleSupabaseError } from '../../lib/toast';
+import PremiumModal, { PremiumInput, PremiumSelect, PremiumTextarea } from '../common/PremiumModal';
 
 interface NewClientModalProps {
   onClose: () => void;
@@ -66,114 +66,82 @@ export default function NewClientModal({ onClose, onSuccess }: NewClientModalPro
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="bg-white rounded-2xl max-w-md w-full">
-        <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-neutral-900">{t('clients.new')}</h2>
+    <PremiumModal
+      isOpen={true}
+      onClose={onClose}
+      title={t('clients.new')}
+      subtitle="Добавить нового клиента в базу данных"
+      maxWidth="md"
+      footer={
+        <>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg hover:bg-neutral-100 flex items-center justify-center transition-colors"
+            className="btn-secondary"
           >
-            <X className="w-5 h-5 text-neutral-500" />
+            {t('common.cancel')}
           </button>
-        </div>
+          <button
+            type="submit"
+            form="new-client-form"
+            disabled={loading}
+            className="btn-primary disabled:opacity-50"
+          >
+            {loading ? t('clients.creating') : t('clients.createCustomer')}
+          </button>
+        </>
+      }
+    >
+      <form id="new-client-form" onSubmit={handleSubmit} className="space-y-4">
+        <PremiumInput
+          label={t('clients.fullName')}
+          required
+          type="text"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          placeholder="John Doe"
+          autoFocus
+        />
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              {t('clients.fullName')} *
-            </label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="John Doe"
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              autoFocus
-            />
-          </div>
+        <PremiumInput
+          label={t('clients.phone')}
+          required
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="+1234567890"
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              {t('clients.phone')} *
-            </label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1234567890"
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+        <PremiumInput
+          label={t('clients.email')}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="customer@example.com"
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              {t('clients.email')}
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="customer@example.com"
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <PremiumSelect
+          label={t('clients.trafficSource')}
+          value={trafficSource}
+          onChange={(e) => setTrafficSource(e.target.value)}
+        >
+          <option value="direct">{t('source.direct')}</option>
+          <option value="Instagram">{t('source.Instagram')}</option>
+          <option value="Google">{t('source.Google')}</option>
+          <option value="Yandex">{t('source.Yandex')}</option>
+          <option value="Facebook">{t('source.Facebook')}</option>
+          <option value="referral">{t('source.referral')}</option>
+          <option value="other">{t('source.other')}</option>
+        </PremiumSelect>
 
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              {t('clients.trafficSource')}
-            </label>
-            <select
-              value={trafficSource}
-              onChange={(e) => setTrafficSource(e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="direct">{t('source.direct')}</option>
-              <option value="Instagram">{t('source.Instagram')}</option>
-              <option value="Google">{t('source.Google')}</option>
-              <option value="Yandex">{t('source.Yandex')}</option>
-              <option value="Facebook">{t('source.Facebook')}</option>
-              <option value="referral">{t('source.referral')}</option>
-              <option value="other">{t('source.other')}</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-              {t('common.notes')}
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder={t('common.notes')}
-              rows={3}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-neutral-200 rounded-lg font-medium hover:bg-neutral-50 transition-colors"
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-md disabled:opacity-50"
-            >
-              {loading ? t('clients.creating') : t('clients.createCustomer')}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <PremiumTextarea
+          label={t('common.notes')}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder={t('common.notes')}
+          rows={3}
+        />
+      </form>
+    </PremiumModal>
   );
 }

@@ -420,21 +420,21 @@ export default function NewOrderModal({ onClose, onSuccess }: NewOrderModalProps
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      className="modal-overlay"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-neutral-900">Новый заказ</h2>
+      <div className="modal-container">
+        <div className="modal-header">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Новый заказ</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg hover:bg-neutral-100 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center transition-colors"
           >
-            <X className="w-5 h-5 text-neutral-500" />
+            <X className="w-5 h-5 text-slate-500" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="modal-body space-y-5">
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1.5">
               Klients / Tālrunis

@@ -23,6 +23,7 @@ import DataExport from './DataExport';
 import RolesPermissions from './RolesPermissions';
 import SystemLogs from './SystemLogs';
 import SuppliersManager from './SuppliersManager';
+import { motion } from 'framer-motion';
 
 type SettingsTab = 'company' | 'services' | 'suppliers' | 'team' | 'permissions' | 'sources' | 'templates' | 'logs' | 'export';
 
@@ -45,52 +46,64 @@ export default function Settings() {
   const tabs = allTabs.filter(tab => !tab.requiresPermission || (tab.checkPermission && tab.checkPermission()));
 
   return (
-    <div className="h-full overflow-auto bg-neutral-50">
+    <div className="h-full overflow-auto bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
       <div className="p-6 max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-neutral-900 flex items-center gap-2">
-            <SettingsIcon className="w-7 h-7" />
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent flex items-center gap-3">
+            <SettingsIcon className="w-8 h-8 text-primary-600" />
             Настройки системы
           </h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <p className="text-sm text-slate-600 mt-2">
             Полный контроль над конфигурацией CRM
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden sticky top-6">
+            <div className="glass-panel overflow-hidden sticky top-6">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
                 return (
-                  <button
+                  <motion.button
                     key={tab.id}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 border-b border-neutral-200 transition-colors ${
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 border-b border-slate-100 transition-all ${
                       isActive
-                        ? 'bg-gradient-to-r from-blue-50 to-blue-50 border-l-4 border-l-blue-500'
-                        : 'hover:bg-neutral-50'
+                        ? 'bg-gradient-to-r from-primary-50 to-primary-100/50 border-l-4 border-l-primary-500'
+                        : 'hover:bg-white/50'
                     }`}
                   >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-neutral-500'}`} />
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-primary-600' : 'text-slate-500'}`} />
                     <div className="flex-1 text-left">
-                      <div className={`text-sm font-medium ${isActive ? 'text-blue-900' : 'text-neutral-700'}`}>
+                      <div className={`text-sm font-semibold ${isActive ? 'text-primary-900' : 'text-slate-700'}`}>
                         {tab.label}
                       </div>
-                      <div className="text-xs text-neutral-500 mt-0.5">
+                      <div className="text-xs text-slate-500 mt-0.5">
                         {tab.description}
                       </div>
                     </div>
-                    <ChevronRight className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-neutral-400'}`} />
-                  </button>
+                    <ChevronRight className={`w-4 h-4 ${isActive ? 'text-primary-600' : 'text-slate-400'}`} />
+                  </motion.button>
                 );
               })}
             </div>
           </div>
 
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg border border-neutral-200 p-6">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+              className="glass-panel p-6"
+            >
               {activeTab === 'company' && <CompanyProfile />}
               {activeTab === 'services' && <ServiceCatalogManager />}
               {activeTab === 'suppliers' && <SuppliersManager />}
@@ -100,7 +113,7 @@ export default function Settings() {
               {activeTab === 'templates' && <DocumentTemplates />}
               {activeTab === 'logs' && <SystemLogs />}
               {activeTab === 'export' && <DataExport />}
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
